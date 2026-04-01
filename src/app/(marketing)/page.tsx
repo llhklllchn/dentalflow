@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { pricingPlans } from "@/lib/constants/pricing";
+
 const operatingCards = [
   {
     title: "مواعيد منظمة للفريق",
@@ -43,6 +45,8 @@ const heroMetrics = [
 ];
 
 export default function MarketingHomePage() {
+  const featuredPlans = pricingPlans.filter((plan) => plan.featured || plan.slug !== "pro");
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
       <section className="panel overflow-hidden p-8 md:p-12">
@@ -65,6 +69,12 @@ export default function MarketingHomePage() {
                 className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white"
               >
                 ابدأ بإنشاء عيادتك
+              </Link>
+              <Link
+                href="/pricing"
+                className="rounded-full border border-brand-200 bg-brand-50 px-6 py-3 text-sm font-semibold text-brand-800"
+              >
+                شاهد الباقات
               </Link>
               <Link
                 href="/features"
@@ -158,6 +168,58 @@ export default function MarketingHomePage() {
               <div>مرن للربط مع البريد وواتساب أو SMS عبر مزودات تشغيل فعلية.</div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mt-8 panel p-6 md:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-700">
+              أسعار الإطلاق
+            </div>
+            <h2 className="mt-3 text-3xl font-bold text-ink">باقات واضحة للبدء في الأردن</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-8 text-slate-600 md:text-base">
+              اخترنا تموضعًا بسيطًا وواضحًا: سعر لكل عيادة، بعملتها المحلية `JOD`، مع باقة
+              Plus كخيار موصى به لمعظم العيادات الصغيرة والمتوسطة.
+            </p>
+          </div>
+          <Link
+            href="/pricing"
+            className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
+          >
+            المقارنة الكاملة
+          </Link>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          {featuredPlans.map((plan) => (
+            <div
+              key={plan.slug}
+              className={`rounded-[1.75rem] border p-6 ${
+                plan.featured
+                  ? "border-brand-200 bg-brand-50/80"
+                  : "border-slate-200 bg-white"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xl font-semibold text-ink">{plan.name}</div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    plan.featured
+                      ? "bg-brand-600 text-white"
+                      : "border border-slate-200 bg-slate-50 text-slate-700"
+                  }`}
+                >
+                  {plan.badge}
+                </span>
+              </div>
+              <div className="mt-5 flex items-end gap-2">
+                <div className="text-4xl font-bold text-ink">{plan.monthlyPriceJod}</div>
+                <div className="pb-1 text-sm text-slate-500">JOD / شهريًا</div>
+              </div>
+              <p className="mt-4 text-sm leading-8 text-slate-600">{plan.description}</p>
+            </div>
+          ))}
         </div>
       </section>
     </main>

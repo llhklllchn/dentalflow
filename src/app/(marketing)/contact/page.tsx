@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/shared/page-header";
+import { pricingPlans } from "@/lib/constants/pricing";
 
 const contactChannels = [
   {
@@ -18,12 +19,14 @@ const contactChannels = [
 ];
 
 export default function ContactPage() {
+  const recommendedPlan = pricingPlans.find((plan) => plan.featured) ?? pricingPlans[1];
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <PageHeader
         eyebrow="Contact"
         title="تواصل معنا"
-        description="هذه الصفحة أصبحت مناسبة كواجهة أولية لتنظيم التواصل التجاري أو طلب عرض تجريبي قبل ربطها لاحقًا بنموذج أو CRM."
+        description="واجهة بيع أولية أوضح لتنظيم طلبات العروض، اختيار الباقة المناسبة، وترتيب الإطلاق التجاري مع العيادات."
       />
 
       <div className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
@@ -47,20 +50,29 @@ export default function ContactPage() {
         <section className="panel p-6 md:p-8">
           <div className="text-xl font-semibold text-ink">الخطوة التالية المقترحة</div>
           <p className="mt-3 text-sm leading-8 text-slate-600">
-            إذا كنت تريد تحويل هذه الصفحة إلى نقطة بيع حقيقية، فالخطوة المنطقية التالية هي
-            ربطها بنموذج طلب عرض تجريبي أو واتساب مخصص للمبيعات.
+            إذا كانت العيادة لا تعرف من أين تبدأ، فالمدخل الأقوى هو توضيح الباقة الموصى بها
+            ثم ترتيب عرض تجريبي قصير أو جلسة إطلاق أولي.
           </p>
 
           <div className="mt-6 rounded-[1.75rem] bg-slate-950 p-6 text-white">
-            <div className="text-lg font-semibold">اقتراح جاهز للإطلاق المنظم</div>
+            <div className="text-lg font-semibold">الباقة الموصى بها الآن</div>
             <div className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
-              <div>زر لحجز عرض تجريبي لمدة 20 دقيقة.</div>
-              <div>زر مباشر للتواصل عبر واتساب التجاري.</div>
-              <div>نموذج مختصر يلتقط اسم العيادة والمدينة وعدد الأطباء.</div>
+              <div>{recommendedPlan.name}</div>
+              <div>
+                {recommendedPlan.monthlyPriceJod} JOD شهريًا أو {recommendedPlan.annualPriceJod} JOD
+                سنويًا
+              </div>
+              <div>{recommendedPlan.audience}</div>
             </div>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/pricing"
+              className="rounded-full border border-brand-200 bg-brand-50 px-5 py-3 text-sm font-semibold text-brand-800"
+            >
+              راجع الباقات
+            </Link>
             <Link
               href="/register-clinic"
               className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"

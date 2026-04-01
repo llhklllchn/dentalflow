@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { PageHeader } from "@/components/shared/page-header";
 
 const featureGroups = [
@@ -53,6 +55,36 @@ export default function FeaturesPage() {
           </section>
         ))}
       </div>
+
+      <section className="panel mt-8 p-6 md:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-700">
+              الخطوة التالية
+            </div>
+            <h2 className="mt-3 text-3xl font-bold text-ink">اختر باقة الإطلاق المناسبة</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-8 text-slate-600 md:text-base">
+              بعد وضوح المزايا، الخطوة التجارية المنطقية هي توضيح الباقة المناسبة للعيادة
+              بحسب حجمها وطريقة تشغيلها.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/pricing"
+              className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"
+            >
+              افتح الباقات
+            </Link>
+            <Link
+              href="/contact"
+              className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
+            >
+              تواصل معنا
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

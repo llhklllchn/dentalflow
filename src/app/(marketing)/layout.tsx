@@ -8,6 +8,7 @@ type MarketingLayoutProps = {
 const marketingLinks = [
   { href: "/", label: "الرئيسية" },
   { href: "/features", label: "المزايا" },
+  { href: "/pricing", label: "الباقات" },
   { href: "/contact", label: "التواصل" }
 ];
 
@@ -59,6 +60,7 @@ export default function MarketingLayout({ children }: MarketingLayoutProps) {
           <div>منصة عربية متخصصة لإدارة عيادات الأسنان والمواعيد والعلاج والفوترة.</div>
           <div className="flex flex-wrap items-center gap-4">
             <Link href="/features">المزايا</Link>
+            <Link href="/pricing">الباقات</Link>
             <Link href="/contact">التواصل</Link>
             <Link href="/login">الدخول</Link>
           </div>
