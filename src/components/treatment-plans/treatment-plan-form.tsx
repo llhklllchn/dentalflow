@@ -7,6 +7,7 @@ import { formatMetricNumber } from "@/lib/utils/formatted-value";
 
 import { FormActions } from "@/components/shared/form-actions";
 import { FormField } from "@/components/shared/form-field";
+import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
 
 type TreatmentPlanFormProps = {
@@ -96,7 +97,29 @@ export function TreatmentPlanForm({
         </div>
       </div>
 
-      <FormSection
+      <FormNavigator
+        title="ابنِ الخطة كخارطة علاج قابلة للتنفيذ"
+        description="ابدأ ببيانات الخطة نفسها، ثم أضف العنصر العلاجي الأول. هذا يجعل الخطة واضحة وسهلة التحويل إلى موعد أو فاتورة."
+        readinessItems={[
+          "ابدأ بالمريض والطبيب والعنوان العلاجي.",
+          "اختر الخدمة والتكلفة التقديرية قبل أي تفاصيل إضافية.",
+          "اجعل الحالة مسودة إذا كانت الخطة تحتاج مراجعة."
+        ]}
+        sections={[
+          {
+            id: "treatment-plan-core-details",
+            label: "بيانات الخطة",
+            hint: "المريض والطبيب والعنوان والحالة العامة."
+          },
+          {
+            id: "treatment-plan-first-item",
+            label: "العنصر العلاجي الأول",
+            hint: "الخدمة والتكلفة والجلسة الأولى أو التاريخ المقترح."
+          }
+        ]}
+      />
+
+      <FormSection id="treatment-plan-core-details" badgeLabel="الهوية العلاجية"
         title="بيانات الخطة"
         description="اجمع المريض والطبيب وعنوان الخطة مع الحالة العامة بحيث تصبح جاهزة للمراجعة أو التنفيذ."
       >
@@ -154,7 +177,7 @@ export function TreatmentPlanForm({
         </div>
       </FormSection>
 
-      <FormSection
+      <FormSection id="treatment-plan-first-item" badgeLabel="البداية العملية"
         title="العنصر العلاجي الأول"
         description="هذه النسخة الحالية تحفظ عنصرًا أوليًا واحدًا داخل الخطة، لذلك اجعله أوضح عنصر تحتاجه للبدء."
       >

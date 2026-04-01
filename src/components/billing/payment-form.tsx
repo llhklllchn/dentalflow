@@ -2,6 +2,7 @@ import { InvoiceDetails, PatientListItem } from "@/lib/constants/mock-data";
 
 import { FormActions } from "@/components/shared/form-actions";
 import { FormField } from "@/components/shared/form-field";
+import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 
@@ -105,7 +106,24 @@ export function PaymentForm({
         </div>
       </div>
 
-      <FormSection
+      <FormNavigator
+        title="سجّل الدفعة كخطوة مالية دقيقة وواضحة"
+        description="ابدأ بالفاتورة الصحيحة ثم أدخل المبلغ وطريقة الدفع والمرجع. هذا يمنع أي التباس لاحقًا في الرصيد أو المراجعة."
+        readinessItems={[
+          "تأكد من الفاتورة والمريض قبل إدخال المبلغ.",
+          "اختر طريقة الدفع كما حدثت فعلًا لا كما تتوقع.",
+          "أضف المرجع عند التحويل أو البطاقة إذا كان مهمًا للمراجعة."
+        ]}
+        sections={[
+          {
+            id: "payment-core-details",
+            label: "بيانات الدفعة",
+            hint: "الفاتورة والمريض والمبلغ وطريقة الدفع والتاريخ."
+          }
+        ]}
+      />
+
+      <FormSection id="payment-core-details" badgeLabel="التحصيل"
         title="بيانات الدفعة"
         description="سجّل الدفعة واربطها مباشرة بالمريض والفاتورة وطريقة السداد مع أقل قدر من الخطوات."
       >

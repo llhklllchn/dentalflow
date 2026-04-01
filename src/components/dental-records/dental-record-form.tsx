@@ -3,6 +3,7 @@ import { formatMetricNumber } from "@/lib/utils/formatted-value";
 
 import { FormActions } from "@/components/shared/form-actions";
 import { FormField } from "@/components/shared/form-field";
+import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
 
 type DentalRecordFormProps = {
@@ -74,7 +75,29 @@ export function DentalRecordForm({
         </div>
       </div>
 
-      <FormSection
+      <FormNavigator
+        title="وثّق الزيارة بخطوتين واضحتين"
+        description="ابدأ ببيانات الزيارة نفسها، ثم انتقل إلى الوصف السريري. هذا يجعل التوثيق أسرع وأسهل في الرجوع لاحقًا."
+        readinessItems={[
+          "اربط السجل بالمريض والطبيب والتاريخ أولًا.",
+          "ابدأ بالشكوى والفحص قبل التشخيص والإجراء.",
+          "اترك متابعة واضحة بدل ملاحظات مطولة وغير عملية."
+        ]}
+        sections={[
+          {
+            id: "dental-record-visit-details",
+            label: "بيانات الزيارة",
+            hint: "المريض والطبيب والتاريخ والأسنان المعنية."
+          },
+          {
+            id: "dental-record-clinical-details",
+            label: "الوصف السريري",
+            hint: "الشكوى والفحص والتشخيص والإجراء والمتابعة."
+          }
+        ]}
+      />
+
+      <FormSection id="dental-record-visit-details" badgeLabel="الربط الأساسي"
         title="بيانات الزيارة"
         description="أدخل السجل السريري واربطه بالمريض والطبيب وتاريخ الزيارة والأسنان المعنية."
       >
@@ -125,7 +148,7 @@ export function DentalRecordForm({
         </div>
       </FormSection>
 
-      <FormSection
+      <FormSection id="dental-record-clinical-details" badgeLabel="المحتوى الطبي"
         title="الوصف السريري"
         description="ركّز على المحتوى السريري الذي سيساعد الطبيب عند العودة إلى السجل لاحقًا."
       >

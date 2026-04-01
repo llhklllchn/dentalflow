@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { FormActions } from "@/components/shared/form-actions";
 import { FormField } from "@/components/shared/form-field";
+import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
 import { PatientListItem, ServiceListItem } from "@/lib/constants/mock-data";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
@@ -105,7 +106,29 @@ export function InvoiceForm({
         </div>
       </div>
 
-      <FormSection
+      <FormNavigator
+        title="ابنِ الفاتورة على مرحلتين واضحتين"
+        description="ابدأ ببيانات الفاتورة نفسها، ثم أكمل بند الخدمة والسعر. هذا يجعل الفاتورة أسهل في الفهم والمراجعة."
+        readinessItems={[
+          "اختر المريض الصحيح أولًا قبل إدخال أي أرقام.",
+          "ابدأ ببند واحد واضح إذا كانت الفاتورة بسيطة.",
+          "راجع الخصم والضريبة فقط إذا كانا مطبقين فعلًا."
+        ]}
+        sections={[
+          {
+            id: "invoice-core-details",
+            label: "بيانات الفاتورة",
+            hint: "المريض وتاريخ الإصدار والاستحقاق والملاحظات العامة."
+          },
+          {
+            id: "invoice-line-items",
+            label: "بنود الفاتورة",
+            hint: "الخدمة والسعر والكمية والخصم والضريبة."
+          }
+        ]}
+      />
+
+      <FormSection id="invoice-core-details" badgeLabel="البيانات الأساسية"
         title="بيانات الفاتورة"
         description="أدخل الحد الأدنى الذي تحتاجه المحاسبة والاستقبال لإصدار فاتورة واضحة وقابلة للمتابعة."
       >
@@ -153,7 +176,7 @@ export function InvoiceForm({
         </div>
       </FormSection>
 
-      <FormSection
+      <FormSection id="invoice-line-items" badgeLabel="التسعير"
         title="بنود الفاتورة"
         description="هذه النسخة تدعم بندًا أساسيًا واحدًا لتسريع العمل اليومي، مع إمكانية تعديل الكمية والسعر والخصم والضريبة."
       >

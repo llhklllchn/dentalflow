@@ -1,5 +1,6 @@
 import { FormActions } from "@/components/shared/form-actions";
 import { FormField } from "@/components/shared/form-field";
+import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
 import {
   DentistListItem,
@@ -107,7 +108,24 @@ export function AppointmentForm({
         </div>
       </div>
 
-      <FormSection
+      <FormNavigator
+        title="رتّب الموعد كمشهد واحد واضح"
+        description="هذا النموذج يصبح أسهل عندما تبدأ بالمريض ثم تربط الطبيب والخدمة والوقت بدل التنقل العشوائي بين الحقول."
+        readinessItems={[
+          "تأكد أولًا من وجود المريض والطبيب والخدمة قبل البدء.",
+          "اختر الوقت الواقعي للجلسة لتقليل إعادة الجدولة.",
+          "اترك الحالة مجدولة إذا لم يتم تأكيد الزيارة بعد."
+        ]}
+        sections={[
+          {
+            id: "appointment-core-details",
+            label: "تفاصيل الموعد",
+            hint: "المريض والطبيب والخدمة والحالة والوقت."
+          }
+        ]}
+      />
+
+      <FormSection id="appointment-core-details" badgeLabel="الحجز الفعلي"
         title="تفاصيل الموعد"
         description="املأ الحد الأدنى من البيانات ليصبح الموعد واضحًا للاستقبال والطبيب من أول نظرة."
       >

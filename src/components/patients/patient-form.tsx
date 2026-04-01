@@ -1,5 +1,6 @@
 import { FormActions } from "@/components/shared/form-actions";
 import { FormField } from "@/components/shared/form-field";
+import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
 
 type PatientFormDefaults = {
@@ -61,7 +62,29 @@ export function PatientForm({
         </div>
       </div>
 
-      <FormSection
+      <FormNavigator
+        title="نموذج مريض أوضح وأسهل"
+        description="ابدأ من البيانات الأساسية ثم انتقل بسرعة إلى البيانات الطبية السريعة. لا تحتاج إلى تعبئة كل شيء من أول مرة."
+        readinessItems={[
+          "افتح الملف أولًا بالاسم والهاتف، ثم أضف ما هو مهم طبيًا فقط.",
+          "استخدم واتساب إذا كانت قناة التواصل مختلفة عن الهاتف الأساسي.",
+          "اترك التفاصيل الأقل أهمية لما بعد الحفظ إذا كان اليوم مزدحمًا."
+        ]}
+        sections={[
+          {
+            id: "patient-basic-details",
+            label: "البيانات الأساسية",
+            hint: "كل ما تحتاجه لفتح ملف المريض والوصول إليه بسرعة."
+          },
+          {
+            id: "patient-medical-snapshot",
+            label: "البيانات الطبية السريعة",
+            hint: "الحساسية والأدوية والملاحظات الأساسية للطبيب."
+          }
+        ]}
+      />
+
+      <FormSection id="patient-basic-details" badgeLabel="ابدأ من هنا"
         title="البيانات الأساسية"
         description="هذه الحقول تكفي لفتح ملف المريض بسرعة وتسهيل الوصول إليه من الاستقبال والطبيب."
       >
@@ -164,7 +187,7 @@ export function PatientForm({
         </div>
       </FormSection>
 
-      <FormSection
+      <FormSection id="patient-medical-snapshot" badgeLabel="مهم للطبيب"
         title="البيانات الطبية السريعة"
         description="سجل أهم ما يجب أن يراه الطبيب من أول نظرة، ويمكن تحديث هذه البيانات لاحقًا من ملف المريض."
       >
