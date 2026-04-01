@@ -1,6 +1,7 @@
 import { InvoiceDetails, PatientListItem } from "@/lib/constants/mock-data";
 
 import { FormActions } from "@/components/shared/form-actions";
+import { FormDraftAssistant } from "@/components/shared/form-draft-assistant";
 import { FormField } from "@/components/shared/form-field";
 import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
@@ -13,6 +14,14 @@ type PaymentFormProps = {
   notice?: string;
   defaultPatientId?: string;
   defaultInvoiceId?: string;
+  defaults?: {
+    amount?: number;
+    paymentMethod?: string;
+    reference?: string;
+    paidAt?: string;
+    notes?: string;
+  };
+  draftKey?: string;
 };
 
 function getPaymentMethodLabel(method: string) {
@@ -36,7 +45,9 @@ export function PaymentForm({
   action,
   notice,
   defaultPatientId,
-  defaultInvoiceId
+  defaultInvoiceId,
+  defaults,
+  draftKey
 }: PaymentFormProps) {
   const hasPatients = patients.length > 0;
   const hasInvoices = invoices.length > 0;
@@ -54,6 +65,8 @@ export function PaymentForm({
           {notice}
         </div>
       ) : null}
+
+      {draftKey ? <FormDraftAssistant draftKey={draftKey} /> : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-brand-200 bg-brand-50 p-5">
@@ -164,7 +177,9 @@ export function PaymentForm({
               type="number"
               min="0"
               step="0.01"
-              defaultValue={extractFormattedAmount(selectedInvoice?.balance ?? "40")}
+              defaultValue={
+                defaults?.amount ?? extractFormattedAmount(selectedInvoice?.balance ?? "40")
+              }
               required
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -172,7 +187,7 @@ export function PaymentForm({
           <FormField label="طريقة الدفع" required>
             <select
               name="paymentMethod"
-              defaultValue="cash"
+              defaultValue={defaults?.paymentMethod ?? "cash"}
               required
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             >
@@ -186,6 +201,7 @@ export function PaymentForm({
           <FormField label="مرجع العملية" optional hint="مفيد للتحويل أو البطاقة أو التسوية الداخلية">
             <input
               name="reference"
+              defaultValue={defaults?.reference}
               placeholder="رقم مرجع أو آخر 4 أرقام أو وصف داخلي"
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -194,6 +210,7 @@ export function PaymentForm({
             <input
               name="paidAt"
               type="date"
+              defaultValue={defaults?.paidAt}
               required
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -205,6 +222,7 @@ export function PaymentForm({
           >
             <textarea
               name="notes"
+              defaultValue={defaults?.notes}
               placeholder="أي سياق يساعد المحاسبة أو الاستقبال لاحقًا"
               className="min-h-28 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />

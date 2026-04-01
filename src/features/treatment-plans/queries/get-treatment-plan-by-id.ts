@@ -4,10 +4,10 @@ import { treatmentPlans } from "@/lib/constants/mock-data";
 
 export async function getTreatmentPlanById(planId: string) {
   return await runWithDataSource({
-    demo: async () => treatmentPlans.find((plan) => plan.id === planId) ?? treatmentPlans[0],
+    demo: async () => treatmentPlans.find((plan) => plan.id === planId) ?? null,
     live: async () => {
       const plans = await getTreatmentPlansList();
-      return plans.find((plan) => plan.id === planId) ?? plans[0];
+      return plans.find((plan) => plan.id === planId) ?? null;
     }
   });
 }

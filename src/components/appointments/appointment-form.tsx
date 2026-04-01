@@ -1,4 +1,5 @@
 import { FormActions } from "@/components/shared/form-actions";
+import { FormDraftAssistant } from "@/components/shared/form-draft-assistant";
 import { FormField } from "@/components/shared/form-field";
 import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
@@ -33,6 +34,7 @@ type AppointmentFormProps = {
   secondaryHref?: string;
   secondaryLabel?: string;
   showStatusField?: boolean;
+  draftKey?: string;
 };
 
 export function AppointmentForm({
@@ -45,7 +47,8 @@ export function AppointmentForm({
   primaryLabel = "حفظ الموعد",
   secondaryHref = "/appointments",
   secondaryLabel = "العودة إلى المواعيد",
-  showStatusField = true
+  showStatusField = true,
+  draftKey
 }: AppointmentFormProps) {
   const defaultStatus = defaults?.status ?? "scheduled";
   const appointmentStatuses = getAppointmentStatusOptions();
@@ -61,6 +64,8 @@ export function AppointmentForm({
           {notice}
         </div>
       ) : null}
+
+      {draftKey ? <FormDraftAssistant draftKey={draftKey} /> : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-brand-200 bg-brand-50 p-5">

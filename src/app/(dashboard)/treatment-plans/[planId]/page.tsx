@@ -1,29 +1,94 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
+import { ActionBanner, type ActionBannerAction } from "@/components/shared/action-banner";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProgressMeter } from "@/components/shared/progress-meter";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getTreatmentPlanById } from "@/features/treatment-plans/queries/get-treatment-plan-by-id";
+import { requirePermission } from "@/lib/auth/guards";
+import {
+  buildAppointmentCreatePath,
+  buildInvoiceCreatePath
+} from "@/lib/navigation/create-flow";
+import { hasPermission } from "@/lib/permissions/permissions";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 
 type TreatmentPlanDetailsPageProps = {
   params: Promise<{
     planId: string;
   }>;
+  searchParams?: Promise<{
+    success?: string;
+    spotlight?: string;
+  }>;
 };
 
+function getPlanSpotlight(input: {
+  spotlight?: string;
+  success?: string;
+  patientId: string;
+  canCreateAppointments: boolean;
+  canCreateInvoices: boolean;
+}) {
+  if (input.spotlight !== "plan-created") {
+    return null;
+  }
+
+  return {
+    eyebrow: "Plan Ready",
+    title: "الخطة أصبحت جاهزة للتنفيذ الفعلي",
+    description:
+      input.success ??
+      "أفضل خطوة الآن غالبًا هي حجز الجلسة الأولى وربط الخطة بمسار الفوترة لنفس المريض.",
+    actions: [
+      input.canCreateAppointments
+        ? {
+            href: buildAppointmentCreatePath({ patientId: input.patientId }),
+            label: "حجز الجلسة الأولى",
+            tone: "primary" as const
+          }
+        : null,
+      input.canCreateInvoices
+        ? {
+            href: buildInvoiceCreatePath({ patientId: input.patientId }),
+            label: "ربط بفواتير"
+          }
+        : null,
+      { href: `/patients/${input.patientId}`, label: "ملف المريض" }
+    ].filter(Boolean) as ActionBannerAction[]
+  };
+}
+
 export default async function TreatmentPlanDetailsPage({
-  params
+  params,
+  searchParams
 }: TreatmentPlanDetailsPageProps) {
+  const user = await requirePermission("treatment-plans:view");
   const { planId } = await params;
+  const resolvedSearchParams = await searchParams;
   const plan = await getTreatmentPlanById(planId);
 
+  if (!plan) {
+    notFound();
+  }
+
+  const canCreateAppointments = hasPermission(user.role, "appointments:*");
+  const canCreateInvoices = hasPermission(user.role, "invoices:*");
   const completedItems = plan.items.filter((item) => item.status === "completed").length;
   const activeItems = plan.items.filter((item) =>
     ["planned", "approved", "in_progress"].includes(item.status)
   ).length;
   const totalItems = plan.items.length;
+  const primaryServiceName = plan.items[0]?.serviceName;
+  const planSpotlight = getPlanSpotlight({
+    spotlight: resolvedSearchParams?.spotlight,
+    success: resolvedSearchParams?.success,
+    patientId: plan.patientId,
+    canCreateAppointments,
+    canCreateInvoices
+  });
 
   return (
     <div>
@@ -33,18 +98,25 @@ export default async function TreatmentPlanDetailsPage({
         description={`خطة علاج للمريض ${plan.patientName} مع الطبيب ${plan.dentistName}.`}
         actions={
           <>
-            <Link
-              href="/appointments/new"
-              className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"
-            >
-              إنشاء جلسة جديدة
-            </Link>
-            <Link
-              href="/invoices/new"
-              className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
-            >
-              ربط بفاتورة
-            </Link>
+            {canCreateAppointments ? (
+              <Link
+                href={buildAppointmentCreatePath({ patientId: plan.patientId })}
+                className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"
+              >
+                إنشاء جلسة جديدة
+              </Link>
+            ) : null}
+            {canCreateInvoices ? (
+              <Link
+                href={buildInvoiceCreatePath({
+                  patientId: plan.patientId,
+                  serviceName: primaryServiceName
+                })}
+                className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
+              >
+                ربط بفاتورة
+              </Link>
+            ) : null}
             <Link
               href={`/patients/${plan.patientId}`}
               className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
@@ -54,6 +126,14 @@ export default async function TreatmentPlanDetailsPage({
           </>
         }
       />
+
+      {planSpotlight ? <ActionBanner {...planSpotlight} /> : null}
+
+      {resolvedSearchParams?.success && !planSpotlight ? (
+        <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          {resolvedSearchParams.success}
+        </div>
+      ) : null}
 
       <div className="grid-cards">
         <StatCard

@@ -8,10 +8,26 @@ import { createPatient } from "@/features/patients/actions/create-patient";
 import { saveMedicalHistory } from "@/features/patients/actions/save-medical-history";
 import { requirePermission } from "@/lib/auth/guards";
 import { getFormGuide } from "@/lib/constants/form-guides";
+import { shouldUseDemoData } from "@/lib/db/data-source";
+import { buildQueryPath } from "@/lib/navigation/create-flow";
 
 type NewPatientPageProps = {
   searchParams?: Promise<{
     error?: string;
+    firstName?: string;
+    lastName?: string;
+    gender?: string;
+    dateOfBirth?: string;
+    phone?: string;
+    whatsappPhone?: string;
+    email?: string;
+    nationalId?: string;
+    city?: string;
+    address?: string;
+    notes?: string;
+    allergies?: string;
+    chronicConditions?: string;
+    currentMedications?: string;
   }>;
 };
 
@@ -39,9 +55,23 @@ export default async function NewPatientPage({ searchParams }: NewPatientPagePro
 
     if (!patientResult.ok || !patientResult.data?.id) {
       redirect(
-        `/patients/new?error=${encodeURIComponent(
-          patientResult.message ?? "تعذر إنشاء المريض."
-        )}`
+        buildQueryPath("/patients/new", {
+          firstName: String(formData.get("firstName") ?? ""),
+          lastName: String(formData.get("lastName") ?? ""),
+          gender: String(formData.get("gender") ?? ""),
+          dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
+          phone: String(formData.get("phone") ?? ""),
+          whatsappPhone: String(formData.get("whatsappPhone") ?? ""),
+          email: String(formData.get("email") ?? ""),
+          nationalId: String(formData.get("nationalId") ?? ""),
+          city: String(formData.get("city") ?? ""),
+          address: String(formData.get("address") ?? ""),
+          notes: String(formData.get("notes") ?? ""),
+          allergies: String(formData.get("allergies") ?? ""),
+          chronicConditions: String(formData.get("chronicConditions") ?? ""),
+          currentMedications: String(formData.get("currentMedications") ?? ""),
+          error: patientResult.message ?? "تعذر إنشاء المريض."
+        })
       );
     }
 
@@ -64,14 +94,43 @@ export default async function NewPatientPage({ searchParams }: NewPatientPagePro
 
       if (!medicalHistoryResult.ok) {
         redirect(
-          `/patients/new?error=${encodeURIComponent(
-            medicalHistoryResult.message ?? "تم حفظ المريض لكن تعذر حفظ السجل الطبي."
-          )}`
+          buildQueryPath("/patients/new", {
+            firstName: String(formData.get("firstName") ?? ""),
+            lastName: String(formData.get("lastName") ?? ""),
+            gender: String(formData.get("gender") ?? ""),
+            dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
+            phone: String(formData.get("phone") ?? ""),
+            whatsappPhone: String(formData.get("whatsappPhone") ?? ""),
+            email: String(formData.get("email") ?? ""),
+            nationalId: String(formData.get("nationalId") ?? ""),
+            city: String(formData.get("city") ?? ""),
+            address: String(formData.get("address") ?? ""),
+            notes: String(formData.get("notes") ?? ""),
+            allergies: String(formData.get("allergies") ?? ""),
+            chronicConditions: String(formData.get("chronicConditions") ?? ""),
+            currentMedications: String(formData.get("currentMedications") ?? ""),
+            error:
+              medicalHistoryResult.message ??
+              "تم حفظ المريض لكن تعذر حفظ السجل الطبي."
+          })
         );
       }
     }
 
-    redirect("/patients");
+    if (shouldUseDemoData()) {
+      redirect(
+        buildQueryPath("/patients", {
+          success: patientResult.message ?? "تم إنشاء المريض بنجاح."
+        })
+      );
+    }
+
+    redirect(
+      buildQueryPath(`/patients/${encodeURIComponent(patientResult.data.id)}`, {
+        success: patientResult.message ?? "تم إنشاء المريض بنجاح.",
+        spotlight: "patient-created"
+      })
+    );
   }
 
   return (
@@ -105,7 +164,27 @@ export default async function NewPatientPage({ searchParams }: NewPatientPagePro
 
       <FormGuidePanel guide={formGuide} />
 
-      <PatientForm action={submitPatientForm} notice={resolvedSearchParams?.error} />
+      <PatientForm
+        action={submitPatientForm}
+        notice={resolvedSearchParams?.error}
+        draftKey="patients:create"
+        defaults={{
+          firstName: resolvedSearchParams?.firstName,
+          lastName: resolvedSearchParams?.lastName,
+          gender: resolvedSearchParams?.gender,
+          dateOfBirth: resolvedSearchParams?.dateOfBirth,
+          phone: resolvedSearchParams?.phone,
+          whatsappPhone: resolvedSearchParams?.whatsappPhone,
+          email: resolvedSearchParams?.email,
+          nationalId: resolvedSearchParams?.nationalId,
+          city: resolvedSearchParams?.city,
+          address: resolvedSearchParams?.address,
+          notes: resolvedSearchParams?.notes,
+          allergies: resolvedSearchParams?.allergies,
+          chronicConditions: resolvedSearchParams?.chronicConditions,
+          currentMedications: resolvedSearchParams?.currentMedications
+        }}
+      />
     </div>
   );
 }

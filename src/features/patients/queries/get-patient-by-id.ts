@@ -15,7 +15,7 @@ import { InvoiceStatus } from "@/types/domain";
 
 export async function getPatientById(patientId: string) {
   return await runWithDataSource({
-    demo: async () => patients.find((patient) => patient.id === patientId) ?? patients[0],
+    demo: async () => patients.find((patient) => patient.id === patientId) ?? null,
     live: async () => {
       const clinicId = await getSessionClinicId();
       const clinic = await getClinicContext();
@@ -60,7 +60,7 @@ export async function getPatientById(patientId: string) {
       });
 
       if (!patient) {
-        return patients[0];
+        return null;
       }
 
       const totalBalance = await prisma.invoice.aggregate({

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { FormActions } from "@/components/shared/form-actions";
+import { FormDraftAssistant } from "@/components/shared/form-draft-assistant";
 import { FormField } from "@/components/shared/form-field";
 import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
@@ -30,6 +31,7 @@ type InvoiceFormProps = {
   secondaryHref?: string;
   secondaryLabel?: string;
   hiddenFields?: ReactNode;
+  draftKey?: string;
 };
 
 export function InvoiceForm({
@@ -41,7 +43,8 @@ export function InvoiceForm({
   primaryLabel = "حفظ الفاتورة",
   secondaryHref = "/invoices",
   secondaryLabel = "العودة إلى الفواتير",
-  hiddenFields
+  hiddenFields,
+  draftKey
 }: InvoiceFormProps) {
   const hasPatients = patients.length > 0;
   const hasServices = services.length > 0;
@@ -59,6 +62,8 @@ export function InvoiceForm({
           {notice}
         </div>
       ) : null}
+
+      {draftKey ? <FormDraftAssistant draftKey={draftKey} /> : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-brand-200 bg-brand-50 p-5">

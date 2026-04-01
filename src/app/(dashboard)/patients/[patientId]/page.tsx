@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
+import { ActionBanner, type ActionBannerAction } from "@/components/shared/action-banner";
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
@@ -10,6 +11,12 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { archivePatient } from "@/features/patients/actions/archive-patient";
 import { getPatientWorkspace } from "@/features/patients/queries/get-patient-workspace";
 import { requirePermission } from "@/lib/auth/guards";
+import {
+  buildAppointmentCreatePath,
+  buildDentalRecordCreatePath,
+  buildInvoiceCreatePath,
+  buildTreatmentPlanCreatePath
+} from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 
@@ -20,6 +27,7 @@ type PatientDetailsPageProps = {
   searchParams?: Promise<{
     error?: string;
     success?: string;
+    spotlight?: string;
   }>;
 };
 
@@ -43,6 +51,102 @@ function getPaymentMethodLabel(value: string) {
   return paymentMethodLabels[value as keyof typeof paymentMethodLabels] ?? value;
 }
 
+function getPatientSpotlight(input: {
+  spotlight?: string;
+  success?: string;
+  patientId: string;
+  canCreateAppointments: boolean;
+  canCreateInvoices: boolean;
+  canCreatePlans: boolean;
+  canCreateRecords: boolean;
+}) {
+  const appointmentHref = buildAppointmentCreatePath({ patientId: input.patientId });
+  const invoiceHref = buildInvoiceCreatePath({ patientId: input.patientId });
+  const planHref = buildTreatmentPlanCreatePath({ patientId: input.patientId });
+  const recordHref = buildDentalRecordCreatePath({ patientId: input.patientId });
+
+  switch (input.spotlight) {
+    case "patient-created":
+      return {
+        eyebrow: "Patient Ready",
+        title: "ملف المريض صار جاهزًا للانطلاق",
+        description:
+          input.success ??
+          "الآن يمكنك حجز أول موعد أو بناء خطة علاج أو إضافة سجل طبي من نفس المسار دون إعادة إدخال البيانات.",
+        actions: [
+          input.canCreateAppointments
+            ? { href: appointmentHref, label: "حجز أول موعد", tone: "primary" as const }
+            : null,
+          input.canCreatePlans ? { href: planHref, label: "خطة علاج" } : null,
+          input.canCreateRecords ? { href: recordHref, label: "سجل طبي" } : null,
+          input.canCreateInvoices ? { href: invoiceHref, label: "فاتورة" } : null
+        ].filter(Boolean) as ActionBannerAction[]
+      };
+    case "appointment-created":
+      return {
+        eyebrow: "Visit Ready",
+        title: "الموعد صار ضمن رحلة المريض",
+        description:
+          input.success ??
+          "يمكنك الآن توثيق الزيارة أو تجهيز الفاتورة أو إضافة خطة علاج مرتبطة بنفس المريض.",
+        actions: [
+          input.canCreateRecords
+            ? { href: recordHref, label: "توثيق الزيارة", tone: "primary" as const }
+            : null,
+          input.canCreateInvoices ? { href: invoiceHref, label: "إنشاء فاتورة" } : null,
+          input.canCreatePlans ? { href: planHref, label: "خطة علاج" } : null
+        ].filter(Boolean) as ActionBannerAction[]
+      };
+    case "invoice-created":
+      return {
+        eyebrow: "Finance Ready",
+        title: "المسار المالي صار جاهزًا للمتابعة",
+        description:
+          input.success ??
+          "أضفت فاتورة جديدة لهذا المريض، ويمكنك متابعة التحصيل أو العودة إلى الملف العلاجي مباشرة.",
+        actions: [
+          input.canCreateAppointments
+            ? { href: appointmentHref, label: "موعد جديد", tone: "primary" as const }
+            : null,
+          { href: "/invoices", label: "عرض الفواتير" },
+          input.canCreatePlans ? { href: planHref, label: "خطة علاج" } : null
+        ].filter(Boolean) as ActionBannerAction[]
+      };
+    case "record-created":
+      return {
+        eyebrow: "Clinical Note Saved",
+        title: "السجل الطبي انضاف مباشرة إلى الملف",
+        description:
+          input.success ??
+          "يمكنك الآن تجهيز متابعة علاجية أو موعد لاحق أو ربط الفاتورة إذا كانت الجلسة تحتاج تحصيلًا.",
+        actions: [
+          input.canCreatePlans
+            ? { href: planHref, label: "بناء خطة علاج", tone: "primary" as const }
+            : null,
+          input.canCreateAppointments ? { href: appointmentHref, label: "موعد متابعة" } : null,
+          input.canCreateInvoices ? { href: invoiceHref, label: "إنشاء فاتورة" } : null
+        ].filter(Boolean) as ActionBannerAction[]
+      };
+    case "plan-created":
+      return {
+        eyebrow: "Plan Ready",
+        title: "خطة العلاج أصبحت جاهزة للتنفيذ",
+        description:
+          input.success ??
+          "الآن أفضل خطوة عادة هي حجز الجلسة الأولى أو ربط الخطة بمسار الفوترة لهذا المريض.",
+        actions: [
+          input.canCreateAppointments
+            ? { href: appointmentHref, label: "حجز الجلسة الأولى", tone: "primary" as const }
+            : null,
+          input.canCreateInvoices ? { href: invoiceHref, label: "ربط بفواتير" } : null,
+          { href: "/treatment-plans", label: "عرض الخطط" }
+        ].filter(Boolean) as ActionBannerAction[]
+      };
+    default:
+      return null;
+  }
+}
+
 export default async function PatientDetailsPage({
   params,
   searchParams
@@ -54,10 +158,25 @@ export default async function PatientDetailsPage({
   const canCreateAppointments = hasPermission(user.role, "appointments:*");
   const canCreateInvoices = hasPermission(user.role, "invoices:*");
   const canCreatePlans = hasPermission(user.role, "treatment-plans:*");
+  const canCreateRecords = hasPermission(user.role, "dental-records:*");
 
   const workspace = await getPatientWorkspace(patientId);
+
+  if (!workspace) {
+    notFound();
+  }
+
   const { patient, dentalRecords, treatmentPlans, payments, timeline } = workspace;
   const activePlan = treatmentPlans[0];
+  const patientSpotlight = getPatientSpotlight({
+    spotlight: resolvedSearchParams?.spotlight,
+    success: resolvedSearchParams?.success,
+    patientId,
+    canCreateAppointments,
+    canCreateInvoices,
+    canCreatePlans,
+    canCreateRecords
+  });
 
   const outstandingBalance = extractFormattedAmount(patient.balance);
   const invoiceCount = patient.recentInvoices.length;
@@ -142,7 +261,7 @@ export default async function PatientDetailsPage({
           <>
             {canCreateAppointments ? (
               <Link
-                href="/appointments/new"
+                href={buildAppointmentCreatePath({ patientId })}
                 className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"
               >
                 موعد جديد
@@ -150,15 +269,23 @@ export default async function PatientDetailsPage({
             ) : null}
             {canCreateInvoices ? (
               <Link
-                href="/invoices/new"
+                href={buildInvoiceCreatePath({ patientId })}
                 className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
               >
                 فاتورة جديدة
               </Link>
             ) : null}
+            {canCreateRecords ? (
+              <Link
+                href={buildDentalRecordCreatePath({ patientId })}
+                className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
+              >
+                سجل طبي
+              </Link>
+            ) : null}
             {canCreatePlans ? (
               <Link
-                href="/treatment-plans/new"
+                href={buildTreatmentPlanCreatePath({ patientId })}
                 className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
               >
                 خطة علاج
@@ -203,7 +330,9 @@ export default async function PatientDetailsPage({
         </div>
       ) : null}
 
-      {resolvedSearchParams?.success ? (
+      {patientSpotlight ? <ActionBanner {...patientSpotlight} /> : null}
+
+      {resolvedSearchParams?.success && !patientSpotlight ? (
         <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           {resolvedSearchParams.success}
         </div>

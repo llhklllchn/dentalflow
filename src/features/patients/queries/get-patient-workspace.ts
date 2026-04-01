@@ -65,7 +65,7 @@ function getPaymentMethodLabel(value: string) {
 }
 
 function buildPatientTimeline(input: {
-  patient: Awaited<ReturnType<typeof getPatientById>>;
+  patient: NonNullable<Awaited<ReturnType<typeof getPatientById>>>;
   dentalRecords: {
     id: string;
     appointmentDate: string;
@@ -159,8 +159,12 @@ function buildPatientTimeline(input: {
 export async function getPatientWorkspace(patientId: string) {
   return await runWithDataSource({
     demo: async () => {
-      const fallbackPatient = patients[0];
-      const patient = patients.find((item) => item.id === patientId) ?? fallbackPatient;
+      const patient = patients.find((item) => item.id === patientId);
+
+      if (!patient) {
+        return null;
+      }
+
       const dentalRecords = dentalRecordsOverview.records.filter(
         (record) => record.patientId === patient.id
       );
@@ -184,6 +188,11 @@ export async function getPatientWorkspace(patientId: string) {
       const clinicId = await getSessionClinicId();
       const clinic = await getClinicContext();
       const patient = await getPatientById(patientId);
+
+      if (!patient) {
+        return null;
+      }
+
       const [dentalRecords, planRecords, paymentRecords] = await Promise.all([
         prisma.dentalRecord.findMany({
           where: {

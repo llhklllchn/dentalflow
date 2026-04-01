@@ -1,4 +1,5 @@
 import { FormActions } from "@/components/shared/form-actions";
+import { FormDraftAssistant } from "@/components/shared/form-draft-assistant";
 import { FormField } from "@/components/shared/form-field";
 import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
@@ -25,13 +26,15 @@ type PatientFormProps = {
   notice?: string;
   defaults?: PatientFormDefaults;
   submitLabel?: string;
+  draftKey?: string;
 };
 
 export function PatientForm({
   action,
   notice,
   defaults,
-  submitLabel
+  submitLabel,
+  draftKey
 }: PatientFormProps) {
   return (
     <form action={action} className="space-y-6">
@@ -40,6 +43,8 @@ export function PatientForm({
           {notice}
         </div>
       ) : null}
+
+      {draftKey ? <FormDraftAssistant draftKey={draftKey} /> : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-brand-200 bg-brand-50 p-5">

@@ -6,9 +6,23 @@ import {
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 
 import { FormActions } from "@/components/shared/form-actions";
+import { FormDraftAssistant } from "@/components/shared/form-draft-assistant";
 import { FormField } from "@/components/shared/form-field";
 import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
+
+type TreatmentPlanFormDefaults = {
+  patientId?: string;
+  dentistId?: string;
+  title?: string;
+  status?: string;
+  serviceName?: string;
+  toothNumber?: string;
+  description?: string;
+  estimatedCost?: number;
+  sessionOrder?: number;
+  plannedDate?: string;
+};
 
 type TreatmentPlanFormProps = {
   patients: PatientListItem[];
@@ -16,6 +30,8 @@ type TreatmentPlanFormProps = {
   services: ServiceListItem[];
   action: (formData: FormData) => void | Promise<void>;
   notice?: string;
+  defaults?: TreatmentPlanFormDefaults;
+  draftKey?: string;
 };
 
 function getTreatmentPlanStatusLabel(status: string) {
@@ -36,7 +52,9 @@ export function TreatmentPlanForm({
   dentists,
   services,
   action,
-  notice
+  notice,
+  defaults,
+  draftKey
 }: TreatmentPlanFormProps) {
   const hasPatients = patients.length > 0;
   const hasDentists = dentists.length > 0;
@@ -50,6 +68,8 @@ export function TreatmentPlanForm({
           {notice}
         </div>
       ) : null}
+
+      {draftKey ? <FormDraftAssistant draftKey={draftKey} /> : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-brand-200 bg-brand-50 p-5">
@@ -127,6 +147,7 @@ export function TreatmentPlanForm({
           <FormField label="المريض" required>
             <select
               name="patientId"
+              defaultValue={defaults?.patientId ?? patients[0]?.id}
               required
               disabled={!hasPatients}
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 disabled:bg-slate-100"
@@ -141,6 +162,7 @@ export function TreatmentPlanForm({
           <FormField label="الطبيب" required>
             <select
               name="dentistId"
+              defaultValue={defaults?.dentistId ?? dentists[0]?.id}
               required
               disabled={!hasDentists}
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 disabled:bg-slate-100"
@@ -155,6 +177,7 @@ export function TreatmentPlanForm({
           <FormField label="عنوان الخطة" required hint="مثال: إعادة تأهيل الفك العلوي أو خطة السن 16">
             <input
               name="title"
+              defaultValue={defaults?.title}
               required
               placeholder="عنوان واضح يختصر الهدف العلاجي"
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
@@ -163,7 +186,7 @@ export function TreatmentPlanForm({
           <FormField label="الحالة" required>
             <select
               name="status"
-              defaultValue="draft"
+              defaultValue={defaults?.status ?? "draft"}
               required
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             >
@@ -185,6 +208,7 @@ export function TreatmentPlanForm({
           <FormField label="الخدمة" required>
             <select
               name="serviceName"
+              defaultValue={defaults?.serviceName ?? services[0]?.name}
               required
               disabled={!hasServices}
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 disabled:bg-slate-100"
@@ -199,6 +223,7 @@ export function TreatmentPlanForm({
           <FormField label="السن المعني" optional hint="مثل: 16 أو 24-25 عند الحاجة">
             <input
               name="toothNumber"
+              defaultValue={defaults?.toothNumber}
               placeholder="16"
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -206,6 +231,7 @@ export function TreatmentPlanForm({
           <FormField label="الوصف" optional hint="ماذا سيتضمن هذا العنصر أو ما مبرره؟">
             <textarea
               name="description"
+              defaultValue={defaults?.description}
               placeholder="مثال: علاج عصب يتبعه بناء وتاج خزفي"
               className="min-h-24 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -216,6 +242,7 @@ export function TreatmentPlanForm({
               type="number"
               min="0"
               step="0.01"
+              defaultValue={defaults?.estimatedCost}
               required
               placeholder="0.00"
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
@@ -227,7 +254,7 @@ export function TreatmentPlanForm({
               type="number"
               min="1"
               step="1"
-              defaultValue={1}
+              defaultValue={defaults?.sessionOrder ?? 1}
               required
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -236,6 +263,7 @@ export function TreatmentPlanForm({
             <input
               name="plannedDate"
               type="date"
+              defaultValue={defaults?.plannedDate}
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
           </FormField>

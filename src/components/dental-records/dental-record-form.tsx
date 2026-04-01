@@ -2,22 +2,40 @@ import { DentistListItem, PatientListItem } from "@/lib/constants/mock-data";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 
 import { FormActions } from "@/components/shared/form-actions";
+import { FormDraftAssistant } from "@/components/shared/form-draft-assistant";
 import { FormField } from "@/components/shared/form-field";
 import { FormNavigator } from "@/components/shared/form-navigator";
 import { FormSection } from "@/components/shared/form-section";
+
+type DentalRecordFormDefaults = {
+  patientId?: string;
+  dentistId?: string;
+  appointmentDate?: string;
+  toothNumbers?: string;
+  chiefComplaint?: string;
+  examinationNotes?: string;
+  diagnosis?: string;
+  procedureDone?: string;
+  prescription?: string;
+  followUpNotes?: string;
+};
 
 type DentalRecordFormProps = {
   patients: PatientListItem[];
   dentists: DentistListItem[];
   action: (formData: FormData) => void | Promise<void>;
   notice?: string;
+  defaults?: DentalRecordFormDefaults;
+  draftKey?: string;
 };
 
 export function DentalRecordForm({
   patients,
   dentists,
   action,
-  notice
+  notice,
+  defaults,
+  draftKey
 }: DentalRecordFormProps) {
   const hasPatients = patients.length > 0;
   const hasDentists = dentists.length > 0;
@@ -30,6 +48,8 @@ export function DentalRecordForm({
           {notice}
         </div>
       ) : null}
+
+      {draftKey ? <FormDraftAssistant draftKey={draftKey} /> : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-brand-200 bg-brand-50 p-5">
@@ -105,6 +125,7 @@ export function DentalRecordForm({
           <FormField label="المريض" required>
             <select
               name="patientId"
+              defaultValue={defaults?.patientId ?? patients[0]?.id}
               required
               disabled={!hasPatients}
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 disabled:bg-slate-100"
@@ -119,6 +140,7 @@ export function DentalRecordForm({
           <FormField label="الطبيب" required>
             <select
               name="dentistId"
+              defaultValue={defaults?.dentistId ?? dentists[0]?.id}
               required
               disabled={!hasDentists}
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 disabled:bg-slate-100"
@@ -134,6 +156,7 @@ export function DentalRecordForm({
             <input
               name="appointmentDate"
               type="date"
+              defaultValue={defaults?.appointmentDate}
               required
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -141,6 +164,7 @@ export function DentalRecordForm({
           <FormField label="الأسنان المعنية" optional hint="مثل: 14, 16 أو 21-22">
             <input
               name="toothNumbers"
+              defaultValue={defaults?.toothNumbers}
               placeholder="14, 16"
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -156,6 +180,7 @@ export function DentalRecordForm({
           <FormField label="الشكوى الرئيسية" optional hint="ما الذي جاء به المريض أو ما الذي اشتكى منه؟">
             <textarea
               name="chiefComplaint"
+              defaultValue={defaults?.chiefComplaint}
               placeholder="مثال: ألم متقطع في السن 14 منذ أسبوع"
               className="min-h-28 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -163,6 +188,7 @@ export function DentalRecordForm({
           <FormField label="الفحص" optional hint="ملاحظات المعاينة أو الفحص السريري">
             <textarea
               name="examinationNotes"
+              defaultValue={defaults?.examinationNotes}
               placeholder="مثال: حساسية للبرد، نخر واضح، وتهيج لثوي خفيف"
               className="min-h-28 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -170,6 +196,7 @@ export function DentalRecordForm({
           <FormField label="التشخيص" optional hint="الخلاصة الطبية أو التشخيص النهائي">
             <textarea
               name="diagnosis"
+              defaultValue={defaults?.diagnosis}
               placeholder="مثال: تسوس عميق مع حاجة لعلاج عصب"
               className="min-h-28 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -177,6 +204,7 @@ export function DentalRecordForm({
           <FormField label="الإجراء المنفذ" optional hint="ما الذي تم عمله فعلًا خلال الجلسة؟">
             <textarea
               name="procedureDone"
+              defaultValue={defaults?.procedureDone}
               placeholder="مثال: فتح الحجرة اللبية ووضع دواء مؤقت"
               className="min-h-28 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -184,6 +212,7 @@ export function DentalRecordForm({
           <FormField label="الوصفة" optional hint="الدواء أو التعليمات العلاجية">
             <textarea
               name="prescription"
+              defaultValue={defaults?.prescription}
               placeholder="مثال: مسكن عند الحاجة وغسول فم لمدة 5 أيام"
               className="min-h-24 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />
@@ -191,6 +220,7 @@ export function DentalRecordForm({
           <FormField label="ملاحظات المتابعة" optional hint="ما الذي يجب عمله أو متابعته لاحقًا؟">
             <textarea
               name="followUpNotes"
+              defaultValue={defaults?.followUpNotes}
               placeholder="مثال: مراجعة بعد أسبوع واستكمال علاج العصب"
               className="min-h-24 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3"
             />

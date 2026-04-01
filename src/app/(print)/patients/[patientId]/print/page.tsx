@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
 import { PrintButton } from "@/components/shared/print-button";
@@ -22,6 +23,10 @@ export default async function PatientPrintPage({ params }: PatientPrintPageProps
     getPatientWorkspace(patientId),
     getClinicContext()
   ]);
+
+  if (!workspace) {
+    notFound();
+  }
 
   const { patient, dentalRecords, treatmentPlans, payments, timeline } = workspace;
   const activePlan = treatmentPlans[0];

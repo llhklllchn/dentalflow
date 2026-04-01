@@ -9,10 +9,21 @@ import { getDentistsList } from "@/features/dentists/queries/get-dentists-list";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { requirePermission } from "@/lib/auth/guards";
 import { getFormGuide } from "@/lib/constants/form-guides";
+import { buildQueryPath } from "@/lib/navigation/create-flow";
 
 type NewDentalRecordPageProps = {
   searchParams?: Promise<{
     error?: string;
+    patientId?: string;
+    dentistId?: string;
+    appointmentDate?: string;
+    toothNumbers?: string;
+    chiefComplaint?: string;
+    examinationNotes?: string;
+    diagnosis?: string;
+    procedureDone?: string;
+    prescription?: string;
+    followUpNotes?: string;
   }>;
 };
 
@@ -31,29 +42,54 @@ export default async function NewDentalRecordPage({
   async function submitDentalRecordForm(formData: FormData) {
     "use server";
 
+    const patientId = String(formData.get("patientId") ?? "");
+    const dentistId = String(formData.get("dentistId") ?? "");
+    const appointmentDate = String(formData.get("appointmentDate") ?? "");
+    const toothNumbers = String(formData.get("toothNumbers") ?? "");
+    const chiefComplaint = String(formData.get("chiefComplaint") ?? "");
+    const examinationNotes = String(formData.get("examinationNotes") ?? "");
+    const diagnosis = String(formData.get("diagnosis") ?? "");
+    const procedureDone = String(formData.get("procedureDone") ?? "");
+    const prescription = String(formData.get("prescription") ?? "");
+    const followUpNotes = String(formData.get("followUpNotes") ?? "");
+
     const result = await createDentalRecord({
-      patientId: String(formData.get("patientId") ?? ""),
-      dentistId: String(formData.get("dentistId") ?? ""),
-      appointmentDate: String(formData.get("appointmentDate") ?? ""),
-      toothNumbers: String(formData.get("toothNumbers") ?? "") || undefined,
-      chiefComplaint: String(formData.get("chiefComplaint") ?? "") || undefined,
-      examinationNotes:
-        String(formData.get("examinationNotes") ?? "") || undefined,
-      diagnosis: String(formData.get("diagnosis") ?? "") || undefined,
-      procedureDone: String(formData.get("procedureDone") ?? "") || undefined,
-      prescription: String(formData.get("prescription") ?? "") || undefined,
-      followUpNotes: String(formData.get("followUpNotes") ?? "") || undefined
+      patientId,
+      dentistId,
+      appointmentDate,
+      toothNumbers: toothNumbers || undefined,
+      chiefComplaint: chiefComplaint || undefined,
+      examinationNotes: examinationNotes || undefined,
+      diagnosis: diagnosis || undefined,
+      procedureDone: procedureDone || undefined,
+      prescription: prescription || undefined,
+      followUpNotes: followUpNotes || undefined
     });
 
     if (!result.ok) {
       redirect(
-        `/dental-records/new?error=${encodeURIComponent(
-          result.message ?? "تعذر حفظ السجل الطبي."
-        )}`
+        buildQueryPath("/dental-records/new", {
+          patientId,
+          dentistId,
+          appointmentDate,
+          toothNumbers,
+          chiefComplaint,
+          examinationNotes,
+          diagnosis,
+          procedureDone,
+          prescription,
+          followUpNotes,
+          error: result.message ?? "تعذر حفظ السجل الطبي."
+        })
       );
     }
 
-    redirect("/dental-records");
+    redirect(
+      buildQueryPath(`/patients/${encodeURIComponent(patientId)}`, {
+        success: result.message ?? "تم حفظ السجل الطبي بنجاح.",
+        spotlight: "record-created"
+      })
+    );
   }
 
   return (
@@ -92,6 +128,19 @@ export default async function NewDentalRecordPage({
         dentists={dentists}
         action={submitDentalRecordForm}
         notice={resolvedSearchParams?.error}
+        draftKey="dental-records:create"
+        defaults={{
+          patientId: resolvedSearchParams?.patientId,
+          dentistId: resolvedSearchParams?.dentistId,
+          appointmentDate: resolvedSearchParams?.appointmentDate,
+          toothNumbers: resolvedSearchParams?.toothNumbers,
+          chiefComplaint: resolvedSearchParams?.chiefComplaint,
+          examinationNotes: resolvedSearchParams?.examinationNotes,
+          diagnosis: resolvedSearchParams?.diagnosis,
+          procedureDone: resolvedSearchParams?.procedureDone,
+          prescription: resolvedSearchParams?.prescription,
+          followUpNotes: resolvedSearchParams?.followUpNotes
+        }}
       />
     </div>
   );

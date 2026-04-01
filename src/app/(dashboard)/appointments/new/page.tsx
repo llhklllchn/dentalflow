@@ -10,10 +10,20 @@ import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { getServicesList } from "@/features/services-catalog/queries/get-services-list";
 import { requirePermission } from "@/lib/auth/guards";
 import { getFormGuide } from "@/lib/constants/form-guides";
+import { buildQueryPath } from "@/lib/navigation/create-flow";
+import { AppointmentStatus } from "@/types/domain";
 
 type NewAppointmentPageProps = {
   searchParams?: Promise<{
     error?: string;
+    patientId?: string;
+    dentistId?: string;
+    serviceId?: string;
+    status?: AppointmentStatus;
+    appointmentDate?: string;
+    startTime?: string;
+    endTime?: string;
+    notes?: string;
   }>;
 };
 
@@ -36,9 +46,10 @@ export default async function NewAppointmentPage({
     const date = String(formData.get("appointmentDate") ?? "");
     const startTime = String(formData.get("startTime") ?? "");
     const endTime = String(formData.get("endTime") ?? "");
+    const patientId = String(formData.get("patientId") ?? "");
 
     const result = await createAppointment({
-      patientId: String(formData.get("patientId") ?? ""),
+      patientId,
       dentistId: String(formData.get("dentistId") ?? ""),
       serviceId: String(formData.get("serviceId") ?? ""),
       startsAt: date && startTime ? new Date(`${date}T${startTime}:00`).toISOString() : "",
@@ -49,13 +60,26 @@ export default async function NewAppointmentPage({
 
     if (!result.ok) {
       redirect(
-        `/appointments/new?error=${encodeURIComponent(
-          result.message ?? "تعذر إنشاء الموعد."
-        )}`
+        buildQueryPath("/appointments/new", {
+          patientId,
+          dentistId: String(formData.get("dentistId") ?? ""),
+          serviceId: String(formData.get("serviceId") ?? ""),
+          status: String(formData.get("status") ?? "scheduled"),
+          appointmentDate: date,
+          startTime,
+          endTime,
+          notes: String(formData.get("notes") ?? ""),
+          error: result.message ?? "تعذر إنشاء الموعد."
+        })
       );
     }
 
-    redirect("/appointments");
+    redirect(
+      buildQueryPath(`/patients/${encodeURIComponent(patientId)}`, {
+        success: result.message ?? "تم إنشاء الموعد بنجاح.",
+        spotlight: "appointment-created"
+      })
+    );
   }
 
   return (
@@ -95,6 +119,17 @@ export default async function NewAppointmentPage({
         services={services}
         action={submitAppointmentForm}
         notice={resolvedSearchParams?.error}
+        draftKey="appointments:create"
+        defaults={{
+          patientId: resolvedSearchParams?.patientId,
+          dentistId: resolvedSearchParams?.dentistId,
+          serviceId: resolvedSearchParams?.serviceId,
+          status: resolvedSearchParams?.status,
+          appointmentDate: resolvedSearchParams?.appointmentDate,
+          startTime: resolvedSearchParams?.startTime,
+          endTime: resolvedSearchParams?.endTime,
+          notes: resolvedSearchParams?.notes
+        }}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { ActionBanner, type ActionBannerAction } from "@/components/shared/action-banner";
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
@@ -10,6 +11,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { setInvoiceStatus } from "@/features/invoices/actions/set-invoice-status";
 import { getInvoiceById } from "@/features/invoices/queries/get-invoice-by-id";
 import { requirePermission } from "@/lib/auth/guards";
+import { buildPaymentCreatePath } from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 
@@ -20,6 +22,7 @@ type InvoiceDetailsPageProps = {
   searchParams?: Promise<{
     error?: string;
     success?: string;
+    spotlight?: string;
   }>;
 };
 
@@ -56,6 +59,69 @@ function buildCollectionGuidance(status: string, balanceAmount: number) {
   }
 }
 
+function getInvoiceSpotlight(input: {
+  spotlight?: string;
+  success?: string;
+  invoiceId: string;
+  patientId: string;
+  balanceAmount: number;
+  canRecordPayments: boolean;
+}) {
+  switch (input.spotlight) {
+    case "invoice-created":
+      return {
+        eyebrow: "Collection Ready",
+        title: "الفاتورة أصبحت جاهزة للتحصيل",
+        description:
+          input.success ??
+          "الخطوة التالية عادة هي تسجيل أول دفعة أو مشاركة الفاتورة مع الفريق المالي وملف المريض.",
+        actions: [
+          input.canRecordPayments
+            ? {
+                href: buildPaymentCreatePath({
+                  invoiceId: input.invoiceId,
+                  patientId: input.patientId
+                }),
+                label: "تسجيل دفعة",
+                tone: "primary" as const
+              }
+            : null,
+          { href: `/patients/${input.patientId}`, label: "ملف المريض" },
+          { href: "/invoices", label: "كل الفواتير" }
+        ].filter(Boolean) as ActionBannerAction[]
+      };
+    case "payment-recorded":
+      return {
+        eyebrow: "Payment Applied",
+        title:
+          input.balanceAmount > 0
+            ? "تم تحديث الرصيد وبقي جزء يحتاج متابعة"
+            : "تم إغلاق الفاتورة ماليًا بنجاح",
+        description:
+          input.success ??
+          (input.balanceAmount > 0
+            ? "يمكنك تسجيل دفعة إضافية لاحقًا أو العودة إلى ملف المريض لمتابعة العلاج والتحصيل."
+            : "الدفعة الأخيرة انعكست على الفاتورة مباشرة، ويمكنك الآن العودة إلى ملف المريض أو سجل المدفوعات."),
+        actions: [
+          input.canRecordPayments && input.balanceAmount > 0
+            ? {
+                href: buildPaymentCreatePath({
+                  invoiceId: input.invoiceId,
+                  patientId: input.patientId
+                }),
+                label: "دفعة إضافية",
+                tone: "primary" as const
+              }
+            : null,
+          { href: `/patients/${input.patientId}`, label: "ملف المريض" },
+          { href: "/payments", label: "سجل المدفوعات" }
+        ].filter(Boolean) as ActionBannerAction[]
+      };
+    default:
+      return null;
+  }
+}
+
 export default async function InvoiceDetailsPage({
   params,
   searchParams
@@ -64,6 +130,7 @@ export default async function InvoiceDetailsPage({
   const { invoiceId } = await params;
   const resolvedSearchParams = await searchParams;
   const canManageInvoices = hasPermission(user.role, "invoices:*");
+  const canRecordPayments = hasPermission(user.role, "payments:*");
   const invoice = await getInvoiceById(invoiceId);
 
   if (!invoice) {
@@ -79,6 +146,14 @@ export default async function InvoiceDetailsPage({
   const totalQuantity = invoice.items.reduce((sum, item) => sum + item.quantity, 0);
   const paymentCount = invoice.paymentHistory?.length ?? 0;
   const collectionGuidance = buildCollectionGuidance(invoice.status, balanceAmount);
+  const invoiceSpotlight = getInvoiceSpotlight({
+    spotlight: resolvedSearchParams?.spotlight,
+    success: resolvedSearchParams?.success,
+    invoiceId: invoice.id,
+    patientId: invoice.patientId,
+    balanceAmount,
+    canRecordPayments
+  });
 
   const itemRows = invoice.items.map((item) => ({
     service: item.name,
@@ -153,9 +228,12 @@ export default async function InvoiceDetailsPage({
                 تعديل الفاتورة
               </Link>
             ) : null}
-            {invoice.status !== "cancelled" ? (
+            {canRecordPayments && invoice.status !== "cancelled" ? (
               <Link
-                href={`/payments/new?invoiceId=${invoice.id}`}
+                href={buildPaymentCreatePath({
+                  invoiceId: invoice.id,
+                  patientId: invoice.patientId
+                })}
                 className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"
               >
                 تسجيل دفعة
@@ -188,7 +266,9 @@ export default async function InvoiceDetailsPage({
         </div>
       ) : null}
 
-      {resolvedSearchParams?.success ? (
+      {invoiceSpotlight ? <ActionBanner {...invoiceSpotlight} /> : null}
+
+      {resolvedSearchParams?.success && !invoiceSpotlight ? (
         <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           {resolvedSearchParams.success}
         </div>
