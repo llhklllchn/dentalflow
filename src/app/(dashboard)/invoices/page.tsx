@@ -7,9 +7,11 @@ import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
 import { setInvoiceStatus } from "@/features/invoices/actions/set-invoice-status";
 import { getInvoicesList } from "@/features/invoices/queries/get-invoices-list";
 import { requirePermission } from "@/lib/auth/guards";
+import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getInvoiceStatusOptions } from "@/lib/domain/labels";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
@@ -32,6 +34,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
   ) as Partial<Record<InvoiceStatus, string>>;
   const user = await requirePermission("invoices:view");
   const canManageInvoices = hasPermission(user.role, "invoices:*");
+  const workflowGuide = getWorkflowGuide("invoices", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
   const status = resolvedSearchParams?.status ?? "all";
@@ -128,6 +131,8 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
           {resolvedSearchParams.success}
         </div>
       ) : null}
+
+      <WorkflowGuidePanel guide={workflowGuide} />
 
       <div className="grid-cards">
         <StatCard

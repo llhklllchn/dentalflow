@@ -7,10 +7,12 @@ import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
 import { archivePatient } from "@/features/patients/actions/archive-patient";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { requirePermission } from "@/lib/auth/guards";
 import { hasPermission } from "@/lib/permissions/permissions";
+import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import {
   extractFormattedAmount,
   formatMetricNumber,
@@ -41,6 +43,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
   const resolvedSearchParams = await searchParams;
   const user = await requirePermission("patients:view");
   const canManagePatients = hasPermission(user.role, "patients:*");
+  const workflowGuide = getWorkflowGuide("patients", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
   const hasFilters = Boolean(search);
@@ -121,6 +124,8 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
           {resolvedSearchParams.success}
         </div>
       ) : null}
+
+      <WorkflowGuidePanel guide={workflowGuide} />
 
       <div className="grid-cards">
         <StatCard

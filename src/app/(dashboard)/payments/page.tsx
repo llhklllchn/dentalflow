@@ -5,8 +5,10 @@ import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { StatCard } from "@/components/shared/stat-card";
+import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
 import { getPaymentsList } from "@/features/payments/queries/get-payments-list";
 import { requirePermission } from "@/lib/auth/guards";
+import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 
 type PaymentsPageProps = {
@@ -48,7 +50,8 @@ function getPaymentMethodTone(method: string) {
 
 export default async function PaymentsPage({ searchParams }: PaymentsPageProps) {
   const resolvedSearchParams = await searchParams;
-  await requirePermission("payments:*");
+  const user = await requirePermission("payments:*");
+  const workflowGuide = getWorkflowGuide("payments", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
   const method = resolvedSearchParams?.method ?? "all";
@@ -102,6 +105,8 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
           </>
         }
       />
+
+      <WorkflowGuidePanel guide={workflowGuide} />
 
       <div className="grid-cards">
         <StatCard

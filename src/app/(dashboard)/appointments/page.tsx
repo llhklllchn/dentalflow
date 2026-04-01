@@ -7,12 +7,14 @@ import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
 import { updateAppointmentStatus } from "@/features/appointments/actions/update-appointment-status";
 import {
   AppointmentsBoardItem,
   getAppointmentsBoard
 } from "@/features/appointments/queries/get-appointments-board";
 import { requirePermission } from "@/lib/auth/guards";
+import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getAppointmentStatusOptions } from "@/lib/domain/labels";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
@@ -88,6 +90,7 @@ export default async function AppointmentsPage({
   const canManageAppointments = hasPermission(user.role, "appointments:*");
   const canUpdateStatuses =
     canManageAppointments || hasPermission(user.role, "appointments:update-status");
+  const workflowGuide = getWorkflowGuide("appointments", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
   const status = resolvedSearchParams?.status ?? "all";
@@ -180,6 +183,8 @@ export default async function AppointmentsPage({
           {resolvedSearchParams.success}
         </div>
       ) : null}
+
+      <WorkflowGuidePanel guide={workflowGuide} />
 
       <div className="grid-cards">
         <StatCard
