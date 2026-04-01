@@ -1,14 +1,42 @@
 import Link from "next/link";
 
+import { RoleWorkspacePanel } from "@/components/dashboard/role-workspace-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { SignalCard } from "@/components/shared/signal-card";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getDashboardOverview } from "@/features/reports/queries/get-dashboard-overview";
+import { requireSession } from "@/lib/auth/guards";
+import { getVisibleNavigationItems, getVisibleQuickActions } from "@/lib/constants/navigation";
+import { getRoleWorkspace } from "@/lib/constants/role-workspace";
+import { getRoleLabel } from "@/lib/domain/labels";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 
+function getHeaderLinks(
+  quickActions: Array<{ href: string; label: string; description: string }>,
+  shortcuts: Array<{ href: string; label: string; description: string }>
+) {
+  const seen = new Set<string>();
+  const combined = [...quickActions, ...shortcuts];
+
+  return combined.filter((item) => {
+    if (seen.has(item.href)) {
+      return false;
+    }
+
+    seen.add(item.href);
+    return true;
+  });
+}
+
 export default async function DashboardPage() {
-  const overview = await getDashboardOverview();
+  const [overview, user] = await Promise.all([getDashboardOverview(), requireSession()]);
+
+  const visibleNavigation = getVisibleNavigationItems(user.role);
+  const visibleQuickActions = getVisibleQuickActions(user.role);
+  const roleWorkspace = getRoleWorkspace(user.role, visibleNavigation, visibleQuickActions);
+  const roleLabel = getRoleLabel(user.role);
+  const headerLinks = getHeaderLinks(visibleQuickActions, roleWorkspace.shortcuts).slice(0, 2);
 
   const activeAppointments = overview.upcomingAppointments.filter((appointment) =>
     ["confirmed", "checked_in", "in_progress"].includes(appointment.status)
@@ -29,31 +57,35 @@ export default async function DashboardPage() {
       <PageHeader
         eyebrow="Clinic Control"
         title="لوحة التحكم"
-        description="غرفة قيادة يومية تربط نبض التشغيل، الأولويات السريعة، أقرب المواعيد، والتنبيهات التي تحتاج قرارًا من الفريق."
-        tips={[
-          "ابدأ من نبض التشغيل",
-          "أغلق طابور الأولويات أولًا",
-          "تابع المواعيد والتنبيهات من نفس الصفحة"
-        ]}
+        description={`مركز قيادة يومي مصمم لـ ${roleLabel} داخل العيادة، يجمع الإشارات السريعة والأولويات والتنقل الذكي في بداية اليوم.`}
+        tips={[roleWorkspace.focusLabel, roleWorkspace.topbarFocus, "ابدأ من المسار المقترح"]}
         actions={
           <>
-            <Link
-              href="/appointments/new"
-              className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"
-            >
-              موعد جديد
-            </Link>
-            <Link
-              href="/patients/new"
-              className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
-            >
-              مريض جديد
-            </Link>
+            {headerLinks.map((link, index) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                title={link.description}
+                className={
+                  index === 0
+                    ? "rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white"
+                    : "rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800"
+                }
+              >
+                {link.label}
+              </Link>
+            ))}
           </>
         }
       />
 
-      <div className="grid-cards">
+      <RoleWorkspacePanel
+        firstName={user.firstName}
+        roleLabel={roleLabel}
+        workspace={roleWorkspace}
+      />
+
+      <div className="mt-6 grid-cards">
         {overview.stats.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}
@@ -65,7 +97,7 @@ export default async function DashboardPage() {
             <div>
               <h2 className="text-xl font-semibold text-ink">نبض التشغيل</h2>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                قراءة تنفيذية سريعة تلخّص وضع الجلسات والتحصيل والمتابعة قبل الدخول في
+                قراءة تنفيذية سريعة تلخص وضع الجلسات والتحصيل والمتابعة قبل الدخول في
                 التفاصيل.
               </p>
             </div>
@@ -122,7 +154,9 @@ export default async function DashboardPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-xs font-semibold text-slate-500">أولوية {index + 1}</div>
+                    <div className="text-xs font-semibold text-slate-500">
+                      أولوية {index + 1}
+                    </div>
                     <div className="mt-2 text-lg font-semibold text-ink">{prompt.title}</div>
                   </div>
                   <span
@@ -159,7 +193,9 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-ink">أقرب المواعيد</h2>
-              <p className="mt-1 text-sm text-slate-500">الجلسات القريبة لهذا اليوم مع الحالة الحالية</p>
+              <p className="mt-1 text-sm text-slate-500">
+                الجلسات القريبة لهذا اليوم مع الحالة الحالية
+              </p>
             </div>
             <Link href="/appointments" className="text-sm font-semibold text-brand-700">
               عرض الكل

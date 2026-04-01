@@ -5,6 +5,7 @@ import { DemoModeBanner } from "@/components/layout/demo-mode-banner";
 import { logoutAction } from "@/features/auth/actions/logout";
 import { getSessionUser } from "@/lib/auth/session";
 import { getVisibleNavigationItems, getVisibleQuickActions } from "@/lib/constants/navigation";
+import { getRoleWorkspace } from "@/lib/constants/role-workspace";
 import { shouldUseDemoData } from "@/lib/db/data-source";
 import { getRoleLabel } from "@/lib/domain/labels";
 import { getClinicContext } from "@/lib/tenant/clinic-context";
@@ -27,6 +28,9 @@ export async function Topbar() {
   const [clinic, user] = await Promise.all([getClinicContext(), getSessionUser()]);
   const visibleNavigation = user ? getVisibleNavigationItems(user.role) : [];
   const visibleQuickActions = user ? getVisibleQuickActions(user.role) : [];
+  const roleWorkspace =
+    user ? getRoleWorkspace(user.role, visibleNavigation, visibleQuickActions) : null;
+  const shortcutLinks = roleWorkspace?.shortcuts.slice(0, 3) ?? [];
 
   const todayLabel = formatTodayLabel();
   const userInitials = user ? getInitials(user.firstName, user.lastName) : "DF";
@@ -89,7 +93,7 @@ export async function Topbar() {
               </span>
               <input
                 name="q"
-                placeholder="ابحث عن مريض أو موعد أو فاتورة..."
+                placeholder={roleWorkspace?.searchPlaceholder ?? "ابحث عن مريض أو موعد أو فاتورة..."}
                 className="w-full bg-transparent text-sm text-slate-600 outline-none"
               />
               <button
@@ -108,12 +112,17 @@ export async function Topbar() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-            {visibleQuickActions.length > 0 ? (
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                إجراءات سريعة
+            {roleWorkspace ? (
+              <span className="rounded-full border border-slate-200 bg-slate-950 px-4 py-2 text-xs font-semibold text-white">
+                {roleWorkspace.topbarFocus}
               </span>
             ) : null}
-            {visibleQuickActions.map((action) => (
+            {shortcutLinks.length > 0 ? (
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                مسارات سريعة
+              </span>
+            ) : null}
+            {shortcutLinks.map((action) => (
               <Link
                 key={action.href}
                 href={action.href}
