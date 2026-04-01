@@ -4,11 +4,14 @@ import { CollectionEmptyState } from "@/components/shared/collection-empty-state
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
+import { QuickFilterStrip } from "@/components/shared/quick-filter-strip";
 import { StatCard } from "@/components/shared/stat-card";
 import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
 import { getPaymentsList } from "@/features/payments/queries/get-payments-list";
 import { requirePermission } from "@/lib/auth/guards";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
+import { normalizePaymentRange } from "@/lib/filters/list-presets";
+import { buildQueryPath } from "@/lib/navigation/create-flow";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 
 type PaymentsPageProps = {
@@ -17,6 +20,7 @@ type PaymentsPageProps = {
     method?: string;
     dateFrom?: string;
     dateTo?: string;
+    range?: string;
   }>;
 };
 
@@ -57,12 +61,14 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   const method = resolvedSearchParams?.method ?? "all";
   const dateFrom = resolvedSearchParams?.dateFrom ?? "";
   const dateTo = resolvedSearchParams?.dateTo ?? "";
-  const hasFilters = Boolean(search || method !== "all" || dateFrom || dateTo);
+  const range = normalizePaymentRange(resolvedSearchParams?.range?.trim().toLowerCase());
+  const hasFilters = Boolean(search || method !== "all" || dateFrom || dateTo || range !== "all");
   const payments = await getPaymentsList({
     search,
     method,
     dateFrom,
-    dateTo
+    dateTo,
+    range
   });
 
   const totalCollected = payments.reduce(
@@ -80,6 +86,45 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     الطريقة: getPaymentMethodLabel(payment.method),
     التاريخ: payment.date
   }));
+  const quickFilterItems = [
+    {
+      label: "كل الفترات",
+      href: buildQueryPath("/payments", {
+        search,
+        method: method !== "all" ? method : undefined,
+        dateFrom,
+        dateTo
+      }),
+      active: range === "all"
+    },
+    {
+      label: "اليوم",
+      href: buildQueryPath("/payments", {
+        search,
+        method: method !== "all" ? method : undefined,
+        range: "today"
+      }),
+      active: range === "today"
+    },
+    {
+      label: "آخر 7 أيام",
+      href: buildQueryPath("/payments", {
+        search,
+        method: method !== "all" ? method : undefined,
+        range: "7d"
+      }),
+      active: range === "7d"
+    },
+    {
+      label: "آخر 30 يومًا",
+      href: buildQueryPath("/payments", {
+        search,
+        method: method !== "all" ? method : undefined,
+        range: "30d"
+      }),
+      active: range === "30d"
+    }
+  ];
 
   return (
     <div>
@@ -203,7 +248,13 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
 
         <aside className="panel p-6">
           <div className="text-xl font-semibold text-ink">فلاتر التحصيل</div>
+          <QuickFilterStrip
+            title="فترات جاهزة"
+            description="انتقل مباشرة إلى دفعات اليوم أو الأسبوع أو الشهر دون تعبئة التواريخ يدويًا في كل مرة."
+            items={quickFilterItems}
+          />
           <form method="get" className="mt-5 grid gap-3 print:hidden">
+            <input type="hidden" name="range" value={range === "all" ? "" : range} />
             <input
               name="search"
               defaultValue={search ?? ""}

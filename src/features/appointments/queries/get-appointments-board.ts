@@ -8,10 +8,16 @@ import {
 } from "@/lib/domain/mappers";
 import { getSessionClinicId } from "@/lib/tenant/scope";
 import { AppointmentStatus } from "@/types/domain";
+import {
+  getAppointmentStatusesForView,
+  normalizeAppointmentView,
+  AppointmentView
+} from "@/lib/filters/list-presets";
 
 type GetAppointmentsBoardOptions = {
   search?: string;
   status?: AppointmentStatus | "all";
+  view?: AppointmentView | string;
 };
 
 export type AppointmentsBoardItem = {
@@ -29,6 +35,11 @@ export async function getAppointmentsBoard(
 ): Promise<AppointmentsBoardItem[]> {
   const search = options?.search?.trim();
   const status = options?.status;
+  const view = normalizeAppointmentView(options?.view?.trim().toLowerCase());
+  const groupedStatuses = getAppointmentStatusesForView(view);
+  const allowedStatuses = status && status !== "all"
+    ? [status]
+    : groupedStatuses;
 
   return await runWithDataSource({
     demo: async () =>
@@ -38,7 +49,7 @@ export async function getAppointmentsBoard(
               .toLowerCase()
               .includes(search.toLowerCase())
           : true;
-        const matchesStatus = status && status !== "all" ? appointment.status === status : true;
+        const matchesStatus = allowedStatuses ? allowedStatuses.includes(appointment.status) : true;
         return matchesSearch && matchesStatus;
       }),
     live: async () => {
@@ -46,16 +57,21 @@ export async function getAppointmentsBoard(
       const appointments = await prisma.appointment.findMany({
         where: {
           clinicId,
-          ...(status && status !== "all"
+          ...(allowedStatuses
             ? {
-                status: status.toUpperCase() as
-                  | "SCHEDULED"
-                  | "CONFIRMED"
-                  | "CHECKED_IN"
-                  | "IN_PROGRESS"
-                  | "COMPLETED"
-                  | "CANCELLED"
-                  | "NO_SHOW"
+                status: {
+                  in: allowedStatuses.map((item) =>
+                    item.toUpperCase()
+                  ) as Array<
+                    | "SCHEDULED"
+                    | "CONFIRMED"
+                    | "CHECKED_IN"
+                    | "IN_PROGRESS"
+                    | "COMPLETED"
+                    | "CANCELLED"
+                    | "NO_SHOW"
+                  >
+                }
               }
             : {}),
           ...(search

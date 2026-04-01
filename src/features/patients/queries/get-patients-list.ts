@@ -9,22 +9,44 @@ import {
 } from "@/lib/domain/mappers";
 import { getClinicContext } from "@/lib/tenant/clinic-context";
 import { getSessionClinicId } from "@/lib/tenant/scope";
+import { normalizePatientSegment, PatientSegment } from "@/lib/filters/list-presets";
+import { extractFormattedAmount, hasDisplayDate } from "@/lib/utils/formatted-value";
 
 type GetPatientsListOptions = {
   search?: string;
+  segment?: PatientSegment | string;
 };
 
 export async function getPatientsList(options?: GetPatientsListOptions) {
   const search = options?.search?.trim();
+  const segment = normalizePatientSegment(options?.segment?.trim().toLowerCase());
 
   return await runWithDataSource({
     demo: async () => {
-      const filteredPatients = !search
-        ? patients
-        : patients.filter((patient) => {
-            const haystack = `${patient.fullName} ${patient.phone}`.toLowerCase();
-            return haystack.includes(search.toLowerCase());
-          });
+      const filteredPatients = patients
+        .filter((patient) => {
+          if (!search) {
+            return true;
+          }
+
+          const haystack = `${patient.fullName} ${patient.phone}`.toLowerCase();
+          return haystack.includes(search.toLowerCase());
+        })
+        .filter((patient) => {
+          if (segment === "open_balance") {
+            return extractFormattedAmount(patient.balance) > 0;
+          }
+
+          if (segment === "recent_visit") {
+            return hasDisplayDate(patient.lastVisit);
+          }
+
+          if (segment === "no_visit") {
+            return !hasDisplayDate(patient.lastVisit);
+          }
+
+          return true;
+        });
 
       return filteredPatients;
     },
@@ -57,6 +79,35 @@ export async function getPatientsList(options?: GetPatientsListOptions) {
                     }
                   }
                 ]
+              }
+            : {})
+          ,
+          ...(segment === "open_balance"
+            ? {
+                invoices: {
+                  some: {
+                    status: {
+                      not: "CANCELLED"
+                    },
+                    balance: {
+                      gt: 0
+                    }
+                  }
+                }
+              }
+            : {}),
+          ...(segment === "recent_visit"
+            ? {
+                appointments: {
+                  some: {}
+                }
+              }
+            : {}),
+          ...(segment === "no_visit"
+            ? {
+                appointments: {
+                  none: {}
+                }
               }
             : {})
         },

@@ -2,6 +2,12 @@ import { payments } from "@/lib/constants/mock-data";
 import { runWithDataSource } from "@/lib/db/data-source";
 import { prisma } from "@/lib/db/prisma";
 import { formatCurrency, formatDate, formatFullName } from "@/lib/domain/mappers";
+import {
+  getPaymentRangeBounds,
+  matchesIsoDateRange,
+  normalizePaymentRange,
+  PaymentRange
+} from "@/lib/filters/list-presets";
 import { getClinicContext } from "@/lib/tenant/clinic-context";
 import { getSessionClinicId } from "@/lib/tenant/scope";
 
@@ -10,6 +16,7 @@ type GetPaymentsListOptions = {
   method?: string;
   dateFrom?: string;
   dateTo?: string;
+  range?: PaymentRange | string;
 };
 
 const paymentMethods = ["all", "cash", "card", "transfer", "mixed"] as const;
@@ -29,8 +36,14 @@ function isIsoDateInput(value: string | undefined) {
 export async function getPaymentsList(options?: GetPaymentsListOptions) {
   const search = options?.search?.trim().toLowerCase();
   const method = normalizePaymentMethod(options?.method?.trim().toLowerCase());
-  const dateFrom = isIsoDateInput(options?.dateFrom?.trim()) ? options?.dateFrom?.trim() : "";
-  const dateTo = isIsoDateInput(options?.dateTo?.trim()) ? options?.dateTo?.trim() : "";
+  const range = normalizePaymentRange(options?.range?.trim().toLowerCase());
+  const presetBounds = getPaymentRangeBounds(range);
+  const dateFrom = isIsoDateInput(options?.dateFrom?.trim())
+    ? options?.dateFrom?.trim()
+    : presetBounds.dateFrom;
+  const dateTo = isIsoDateInput(options?.dateTo?.trim())
+    ? options?.dateTo?.trim()
+    : presetBounds.dateTo;
 
   return await runWithDataSource({
     demo: async () =>
@@ -39,10 +52,9 @@ export async function getPaymentsList(options?: GetPaymentsListOptions) {
           ? `${payment.patient} ${payment.invoiceId}`.toLowerCase().includes(search)
           : true;
         const matchesMethod = method === "all" ? true : payment.method === method;
-        const matchesFrom = dateFrom ? payment.date >= dateFrom : true;
-        const matchesTo = dateTo ? payment.date <= dateTo : true;
+        const matchesRange = matchesIsoDateRange(payment.date, dateFrom, dateTo);
 
-        return matchesSearch && matchesMethod && matchesFrom && matchesTo;
+        return matchesSearch && matchesMethod && matchesRange;
       }),
     live: async () => {
       const clinicId = await getSessionClinicId();

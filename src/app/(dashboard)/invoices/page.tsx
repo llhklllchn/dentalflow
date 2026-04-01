@@ -5,6 +5,7 @@ import { CollectionEmptyState } from "@/components/shared/collection-empty-state
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
+import { QuickFilterStrip } from "@/components/shared/quick-filter-strip";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
@@ -13,6 +14,8 @@ import { getInvoicesList } from "@/features/invoices/queries/get-invoices-list";
 import { requirePermission } from "@/lib/auth/guards";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getInvoiceStatusOptions } from "@/lib/domain/labels";
+import { normalizeInvoiceView } from "@/lib/filters/list-presets";
+import { buildQueryPath } from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 import { InvoiceStatus } from "@/types/domain";
@@ -21,6 +24,7 @@ type InvoicesPageProps = {
   searchParams?: Promise<{
     search?: string;
     status?: InvoiceStatus | "all";
+    view?: string;
     error?: string;
     success?: string;
   }>;
@@ -38,10 +42,12 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
   const search = resolvedSearchParams?.search?.trim();
   const status = resolvedSearchParams?.status ?? "all";
-  const hasFilters = Boolean(search || status !== "all");
+  const view = normalizeInvoiceView(resolvedSearchParams?.view?.trim().toLowerCase());
+  const hasFilters = Boolean(search || status !== "all" || view !== "all");
   const invoices = await getInvoicesList({
     search,
-    status
+    status,
+    view
   });
 
   const visibleTotal = invoices.reduce(
@@ -63,6 +69,40 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
     المتبقي: invoice.balance,
     الحالة: invoiceStatusLabels[invoice.status] ?? invoice.status
   }));
+  const quickFilterItems = [
+    {
+      label: "كل الفواتير",
+      href: buildQueryPath("/invoices", {
+        search,
+        status: status !== "all" ? status : undefined
+      }),
+      active: view === "all"
+    },
+    {
+      label: "تحتاج تحصيل",
+      href: buildQueryPath("/invoices", {
+        search,
+        view: "attention"
+      }),
+      active: view === "attention"
+    },
+    {
+      label: "برصيد مفتوح",
+      href: buildQueryPath("/invoices", {
+        search,
+        view: "open_balance"
+      }),
+      active: view === "open_balance"
+    },
+    {
+      label: "مدفوعة",
+      href: buildQueryPath("/invoices", {
+        search,
+        view: "settled"
+      }),
+      active: view === "settled"
+    }
+  ];
 
   async function submitStatusForm(formData: FormData) {
     "use server";
@@ -75,6 +115,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
     const query = new URLSearchParams();
     const currentSearch = String(formData.get("search") ?? "");
     const currentStatus = String(formData.get("status") ?? "all");
+    const currentView = String(formData.get("view") ?? "all");
 
     if (currentSearch) {
       query.set("search", currentSearch);
@@ -82,6 +123,10 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
     if (currentStatus) {
       query.set("status", currentStatus);
+    }
+
+    if (currentView && currentView !== "all") {
+      query.set("view", currentView);
     }
 
     if (!result.ok) {
@@ -158,10 +203,17 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
       </div>
 
       <div className="panel mt-6 p-6">
+        <QuickFilterStrip
+          title="اختصارات مالية جاهزة"
+          description="انتقل بسرعة إلى الفواتير التي تحتاج تحصيل أو ما زالت برصيد مفتوح أو تلك التي أغلقت بالكامل."
+          items={quickFilterItems}
+        />
+
         <form
           method="get"
           className="mb-6 grid gap-3 print:hidden md:grid-cols-[1fr,220px,160px,140px]"
         >
+          <input type="hidden" name="view" value={view === "all" ? "" : view} />
           <input
             name="search"
             defaultValue={search ?? ""}
@@ -247,6 +299,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                         <input type="hidden" name="nextStatus" value="cancelled" />
                         <input type="hidden" name="search" value={search ?? ""} />
                         <input type="hidden" name="status" value={status} />
+                        <input type="hidden" name="view" value={view} />
                         <button type="submit" className="font-semibold text-rose-700">
                           إلغاء
                         </button>
@@ -308,6 +361,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                               <input type="hidden" name="nextStatus" value="cancelled" />
                               <input type="hidden" name="search" value={search ?? ""} />
                               <input type="hidden" name="status" value={status} />
+                              <input type="hidden" name="view" value={view} />
                               <button type="submit" className="font-semibold text-rose-700">
                                 إلغاء
                               </button>

@@ -5,6 +5,7 @@ import { CollectionEmptyState } from "@/components/shared/collection-empty-state
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
+import { QuickFilterStrip } from "@/components/shared/quick-filter-strip";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
@@ -13,6 +14,8 @@ import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { requirePermission } from "@/lib/auth/guards";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
+import { normalizePatientSegment } from "@/lib/filters/list-presets";
+import { buildQueryPath } from "@/lib/navigation/create-flow";
 import {
   extractFormattedAmount,
   formatMetricNumber,
@@ -22,6 +25,7 @@ import {
 type PatientsPageProps = {
   searchParams?: Promise<{
     search?: string;
+    segment?: string;
     error?: string;
     success?: string;
   }>;
@@ -46,9 +50,11 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
   const workflowGuide = getWorkflowGuide("patients", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
-  const hasFilters = Boolean(search);
+  const segment = normalizePatientSegment(resolvedSearchParams?.segment?.trim().toLowerCase());
+  const hasFilters = Boolean(search || segment !== "all");
   const patients = await getPatientsList({
-    search
+    search,
+    segment
   });
 
   const totalOutstanding = patients.reduce(
@@ -68,6 +74,39 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
     الطبيب: patient.dentistName,
     الرصيد: patient.balance
   }));
+  const quickFilterItems = [
+    {
+      label: "كل المرضى",
+      href: buildQueryPath("/patients", {
+        search
+      }),
+      active: segment === "all"
+    },
+    {
+      label: "برصيد مفتوح",
+      href: buildQueryPath("/patients", {
+        search,
+        segment: "open_balance"
+      }),
+      active: segment === "open_balance"
+    },
+    {
+      label: "لديهم زيارة",
+      href: buildQueryPath("/patients", {
+        search,
+        segment: "recent_visit"
+      }),
+      active: segment === "recent_visit"
+    },
+    {
+      label: "بلا زيارة",
+      href: buildQueryPath("/patients", {
+        search,
+        segment: "no_visit"
+      }),
+      active: segment === "no_visit"
+    }
+  ];
 
   async function archivePatientFromList(formData: FormData) {
     "use server";
@@ -151,10 +190,17 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
       </div>
 
       <div className="panel mt-6 p-6">
+        <QuickFilterStrip
+          title="فلاتر جاهزة"
+          description="انتقل مباشرة إلى المرضى الذين يحتاجون متابعة مالية أو لديهم زيارة سابقة أو ما زالوا بلا زيارة."
+          items={quickFilterItems}
+        />
+
         <form
           method="get"
           className="mb-5 grid gap-3 print:hidden md:grid-cols-[1fr,180px,160px]"
         >
+          <input type="hidden" name="segment" value={segment === "all" ? "" : segment} />
           <input
             name="search"
             defaultValue={search ?? ""}

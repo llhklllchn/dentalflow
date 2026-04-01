@@ -9,10 +9,13 @@ import {
 import { getClinicContext } from "@/lib/tenant/clinic-context";
 import { getSessionClinicId } from "@/lib/tenant/scope";
 import { InvoiceStatus } from "@/types/domain";
+import { extractFormattedAmount } from "@/lib/utils/formatted-value";
+import { normalizeInvoiceView, InvoiceView } from "@/lib/filters/list-presets";
 
 type GetInvoicesListOptions = {
   search?: string;
   status?: string;
+  view?: InvoiceView | string;
 };
 
 export async function getInvoicesList(
@@ -20,17 +23,31 @@ export async function getInvoicesList(
 ): Promise<InvoiceDetails[]> {
   const search = options?.search?.trim();
   const status = options?.status?.trim().toLowerCase();
+  const view = normalizeInvoiceView(options?.view?.trim().toLowerCase());
+  const allowedStatuses =
+    status && status !== "all"
+      ? [status]
+      : view === "settled"
+        ? ["paid"]
+        : view === "attention"
+          ? ["issued", "partially_paid", "overdue"]
+          : null;
 
   return await runWithDataSource({
     demo: async () =>
       invoices.filter((invoice) => {
-        const matchesStatus = !status || status === "all" ? true : invoice.status === status;
+        const matchesStatus = allowedStatuses ? allowedStatuses.includes(invoice.status) : true;
+        const matchesView =
+          view === "open_balance"
+            ? extractFormattedAmount(invoice.balance) > 0 && invoice.status !== "cancelled"
+            : true;
 
         if (!search) {
-          return matchesStatus;
+          return matchesStatus && matchesView;
         }
 
         return (
+          matchesView &&
           matchesStatus &&
           `${invoice.id} ${invoice.patient}`.toLowerCase().includes(search.toLowerCase())
         );
@@ -41,15 +58,30 @@ export async function getInvoicesList(
       const records = await prisma.invoice.findMany({
         where: {
           clinicId,
-          ...(status && status !== "all"
+          ...(allowedStatuses
             ? {
-                status: status.toUpperCase() as
-                  | "DRAFT"
-                  | "ISSUED"
-                  | "PARTIALLY_PAID"
-                  | "PAID"
-                  | "OVERDUE"
-                  | "CANCELLED"
+                status: {
+                  in: allowedStatuses.map((item) =>
+                    item.toUpperCase()
+                  ) as Array<
+                    | "DRAFT"
+                    | "ISSUED"
+                    | "PARTIALLY_PAID"
+                    | "PAID"
+                    | "OVERDUE"
+                    | "CANCELLED"
+                  >
+                }
+              }
+            : {}),
+          ...(view === "open_balance"
+            ? {
+                balance: {
+                  gt: 0
+                },
+                status: {
+                  not: "CANCELLED"
+                }
               }
             : {}),
           ...(search

@@ -5,6 +5,7 @@ import { CollectionEmptyState } from "@/components/shared/collection-empty-state
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
+import { QuickFilterStrip } from "@/components/shared/quick-filter-strip";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
@@ -16,6 +17,8 @@ import {
 import { requirePermission } from "@/lib/auth/guards";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getAppointmentStatusOptions } from "@/lib/domain/labels";
+import { normalizeAppointmentView } from "@/lib/filters/list-presets";
+import { buildQueryPath } from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 import { AppointmentStatus } from "@/types/domain";
@@ -24,6 +27,7 @@ type AppointmentsPageProps = {
   searchParams?: Promise<{
     search?: string;
     status?: AppointmentStatus | "all";
+    view?: string;
     error?: string;
     success?: string;
   }>;
@@ -94,10 +98,12 @@ export default async function AppointmentsPage({
 
   const search = resolvedSearchParams?.search?.trim();
   const status = resolvedSearchParams?.status ?? "all";
-  const hasFilters = Boolean(search || status !== "all");
+  const view = normalizeAppointmentView(resolvedSearchParams?.view?.trim().toLowerCase());
+  const hasFilters = Boolean(search || status !== "all" || view !== "all");
   const appointments: AppointmentsBoardItem[] = await getAppointmentsBoard({
     search,
-    status
+    status,
+    view
   });
 
   const confirmedOrCheckedIn = appointments.filter((appointment) =>
@@ -116,6 +122,48 @@ export default async function AppointmentsPage({
     الوقت: appointment.time,
     الحالة: statusLabelMap[appointment.status] ?? appointment.status
   }));
+  const quickFilterItems = [
+    {
+      label: "كل المواعيد",
+      href: buildQueryPath("/appointments", {
+        search,
+        status: status !== "all" ? status : undefined
+      }),
+      active: view === "all"
+    },
+    {
+      label: "جاهزة للاستقبال",
+      href: buildQueryPath("/appointments", {
+        search,
+        view: "ready"
+      }),
+      active: view === "ready"
+    },
+    {
+      label: "قيد التنفيذ",
+      href: buildQueryPath("/appointments", {
+        search,
+        view: "active"
+      }),
+      active: view === "active"
+    },
+    {
+      label: "تحتاج متابعة",
+      href: buildQueryPath("/appointments", {
+        search,
+        view: "follow_up"
+      }),
+      active: view === "follow_up"
+    },
+    {
+      label: "مكتملة",
+      href: buildQueryPath("/appointments", {
+        search,
+        view: "completed"
+      }),
+      active: view === "completed"
+    }
+  ];
 
   async function submitStatusChange(formData: FormData) {
     "use server";
@@ -124,6 +172,7 @@ export default async function AppointmentsPage({
     const nextStatus = String(formData.get("nextStatus") ?? "") as AppointmentStatus;
     const currentSearch = String(formData.get("search") ?? "");
     const currentStatus = String(formData.get("status") ?? "all");
+    const currentView = String(formData.get("view") ?? "all");
 
     const result = await updateAppointmentStatus(appointmentId, nextStatus);
     const query = new URLSearchParams();
@@ -134,6 +183,10 @@ export default async function AppointmentsPage({
 
     if (currentStatus) {
       query.set("status", currentStatus);
+    }
+
+    if (currentView && currentView !== "all") {
+      query.set("view", currentView);
     }
 
     if (!result.ok) {
@@ -210,10 +263,17 @@ export default async function AppointmentsPage({
       </div>
 
       <div className="panel mt-6 p-6">
+        <QuickFilterStrip
+          title="حالات جاهزة بنقرة واحدة"
+          description="بدل تغيير الفلاتر يدويًا كل مرة، افتح مباشرة المواعيد الجاهزة أو التي تحتاج متابعة أو الجلسات النشطة الآن."
+          items={quickFilterItems}
+        />
+
         <form
           method="get"
           className="mb-6 grid gap-3 print:hidden md:grid-cols-[1fr,220px,160px,140px]"
         >
+          <input type="hidden" name="view" value={view === "all" ? "" : view} />
           <input
             name="search"
             defaultValue={search ?? ""}
@@ -312,6 +372,7 @@ export default async function AppointmentsPage({
                             <input type="hidden" name="nextStatus" value={action.nextStatus} />
                             <input type="hidden" name="search" value={search ?? ""} />
                             <input type="hidden" name="status" value={status} />
+                            <input type="hidden" name="view" value={view} />
                             <button
                               type="submit"
                               className={
