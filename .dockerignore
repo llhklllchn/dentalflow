@@ -1,0 +1,11 @@
+.next
+node_modules
+npm-debug.log
+coverage
+.env
+.env.local
+.env.production
+.git
+.github
+docs
+*.log

@@ -1,0 +1,565 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  DENTIST
+  RECEPTIONIST
+  ACCOUNTANT
+  ASSISTANT
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum TreatmentPlanStatus {
+  DRAFT
+  PLANNED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ToothRecordStatus {
+  HEALTHY
+  DECAY
+  FILLING
+  MISSING
+  ROOT_CANAL
+  CROWN
+  EXTRACTED
+  IMPLANT
+  UNDER_OBSERVATION
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  MIXED
+}
+
+enum NotificationChannel {
+  SMS
+  EMAIL
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum StaffInvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+model Clinic {
+  id                         String                  @id @default(cuid())
+  name                       String
+  slug                       String                  @unique
+  logoUrl                    String?                 @map("logo_url")
+  phone                      String?
+  email                      String?
+  country                    String?
+  city                       String?
+  address                    String?
+  timezone                   String?
+  currency                   String?
+  language                   String?
+  workingDaysJson            Json?                   @map("working_days_json")
+  workingHoursJson           Json?                   @map("working_hours_json")
+  defaultAppointmentDuration Int?                    @map("default_appointment_duration")
+  createdAt                  DateTime                @default(now()) @map("created_at")
+  updatedAt                  DateTime                @updatedAt @map("updated_at")
+  users                      User[]
+  dentists                   Dentist[]
+  patients                   Patient[]
+  patientMedicalHistories    PatientMedicalHistory[]
+  services                   Service[]
+  appointments               Appointment[]
+  appointmentStatusLogs      AppointmentStatusLog[]
+  dentalRecords              DentalRecord[]
+  toothRecords               ToothRecord[]
+  treatmentPlans             TreatmentPlan[]
+  treatmentPlanItems         TreatmentPlanItem[]
+  invoices                   Invoice[]
+  invoiceItems               InvoiceItem[]
+  payments                   Payment[]
+  notifications              Notification[]
+  notificationTemplates      NotificationTemplate[]
+  staffInvitations           StaffInvitation[]
+  subscriptions              Subscription[]
+  auditLogs                  AuditLog[]
+
+  @@map("clinics")
+}
+
+model User {
+  id                    String                  @id @default(cuid())
+  clinicId              String                  @map("clinic_id")
+  firstName             String                  @map("first_name")
+  lastName              String                  @map("last_name")
+  email                 String
+  phone                 String?
+  passwordHash          String                  @map("password_hash")
+  role                  UserRole
+  status                UserStatus              @default(ACTIVE)
+  lastLoginAt           DateTime?               @map("last_login_at")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  clinic                Clinic                  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  dentistProfile        Dentist?
+  createdAppointments   Appointment[]           @relation("AppointmentCreatedBy")
+  updatedAppointments   Appointment[]           @relation("AppointmentUpdatedBy")
+  appointmentStatusLogs AppointmentStatusLog[]  @relation("AppointmentStatusChangedBy")
+  updatedMedicalHistory PatientMedicalHistory[] @relation("MedicalHistoryUpdatedBy")
+  createdInvoices       Invoice[]               @relation("InvoiceCreatedBy")
+  recordedPayments      Payment[]               @relation("PaymentRecordedBy")
+  invitedStaff          StaffInvitation[]       @relation("StaffInvitationInvitedBy")
+  updatedToothRecords   ToothRecord[]           @relation("ToothRecordUpdatedBy")
+  passwordResetTokens   PasswordResetToken[]
+  auditLogs             AuditLog[]
+
+  @@unique([clinicId, email])
+  @@map("users")
+}
+
+model Dentist {
+  id                         String        @id @default(cuid())
+  clinicId                   String        @map("clinic_id")
+  userId                     String        @unique @map("user_id")
+  specialty                  String?
+  licenseNumber              String?       @map("license_number")
+  colorCode                  String?       @map("color_code")
+  defaultAppointmentDuration Int?          @map("default_appointment_duration")
+  workingDaysJson            Json?         @map("working_days_json")
+  workingHoursJson           Json?         @map("working_hours_json")
+  createdAt                  DateTime      @default(now()) @map("created_at")
+  updatedAt                  DateTime      @updatedAt @map("updated_at")
+  clinic                     Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  user                       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments               Appointment[]
+  dentalRecords              DentalRecord[]
+  treatmentPlans             TreatmentPlan[]
+
+  @@map("dentists")
+}
+
+model Patient {
+  id              String                 @id @default(cuid())
+  clinicId        String                 @map("clinic_id")
+  firstName       String                 @map("first_name")
+  lastName        String                 @map("last_name")
+  gender          String?
+  dateOfBirth     DateTime?              @map("date_of_birth")
+  phone           String
+  whatsappPhone   String?                @map("whatsapp_phone")
+  email           String?
+  nationalId      String?                @map("national_id")
+  city            String?
+  address         String?
+  notes           String?
+  archivedAt      DateTime?              @map("archived_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  clinic          Clinic                 @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  medicalHistory  PatientMedicalHistory?
+  appointments    Appointment[]
+  dentalRecords   DentalRecord[]
+  toothRecords    ToothRecord[]
+  treatmentPlans  TreatmentPlan[]
+  invoices        Invoice[]
+  payments        Payment[]
+  notifications   Notification[]
+
+  @@map("patients")
+}
+
+model PatientMedicalHistory {
+  id                 String   @id @default(cuid())
+  clinicId           String   @map("clinic_id")
+  patientId          String   @unique @map("patient_id")
+  allergies          String?
+  chronicConditions  String?  @map("chronic_conditions")
+  currentMedications String?  @map("current_medications")
+  smokingStatus      String?  @map("smoking_status")
+  pregnancyStatus    String?  @map("pregnancy_status")
+  medicalNotes       String?  @map("medical_notes")
+  updatedBy          String?  @map("updated_by")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  clinic             Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient            Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  updatedByUser      User?    @relation("MedicalHistoryUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@map("patient_medical_histories")
+}
+
+model Service {
+  id                     String        @id @default(cuid())
+  clinicId               String        @map("clinic_id")
+  name                   String
+  description            String?
+  defaultDurationMinutes Int           @map("default_duration_minutes")
+  price                  Decimal       @db.Decimal(10, 2)
+  isActive               Boolean       @default(true) @map("is_active")
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
+  clinic                 Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  appointments           Appointment[]
+  invoiceItems           InvoiceItem[]
+  treatmentPlanItems     TreatmentPlanItem[]
+
+  @@map("services")
+}
+
+model Appointment {
+  id                 String               @id @default(cuid())
+  clinicId           String               @map("clinic_id")
+  patientId          String               @map("patient_id")
+  dentistId          String               @map("dentist_id")
+  serviceId          String               @map("service_id")
+  startsAt           DateTime             @map("starts_at")
+  endsAt             DateTime             @map("ends_at")
+  status             AppointmentStatus
+  confirmationStatus String?              @map("confirmation_status")
+  notes              String?
+  createdBy          String?              @map("created_by")
+  updatedBy          String?              @map("updated_by")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  cancelledAt        DateTime?            @map("cancelled_at")
+  completedAt        DateTime?            @map("completed_at")
+  clinic             Clinic               @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient            Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  dentist            Dentist              @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  service            Service              @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  createdByUser      User?                @relation("AppointmentCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByUser      User?                @relation("AppointmentUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  statusLogs         AppointmentStatusLog[]
+  dentalRecords      DentalRecord[]
+  notifications      Notification[]
+
+  @@index([clinicId, startsAt])
+  @@map("appointments")
+}
+
+model AppointmentStatusLog {
+  id            String             @id @default(cuid())
+  clinicId      String             @map("clinic_id")
+  appointmentId String             @map("appointment_id")
+  oldStatus     AppointmentStatus? @map("old_status")
+  newStatus     AppointmentStatus  @map("new_status")
+  changedBy     String?            @map("changed_by")
+  changedAt     DateTime           @default(now()) @map("changed_at")
+  clinic        Clinic             @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  appointment   Appointment        @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  changedByUser User?              @relation("AppointmentStatusChangedBy", fields: [changedBy], references: [id], onDelete: SetNull)
+
+  @@map("appointment_status_logs")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  clinicId      String        @map("clinic_id")
+  patientId     String        @map("patient_id")
+  treatmentPlanId String?     @map("treatment_plan_id")
+  invoiceNumber String        @map("invoice_number")
+  issueDate     DateTime      @map("issue_date")
+  dueDate       DateTime?     @map("due_date")
+  status        InvoiceStatus
+  subtotal      Decimal       @db.Decimal(10, 2)
+  discount      Decimal       @db.Decimal(10, 2)
+  tax           Decimal       @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
+  paidAmount    Decimal       @map("paid_amount") @db.Decimal(10, 2)
+  balance       Decimal       @db.Decimal(10, 2)
+  notes         String?
+  createdBy     String?       @map("created_by")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  clinic        Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient       Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  treatmentPlan TreatmentPlan? @relation(fields: [treatmentPlanId], references: [id], onDelete: SetNull)
+  createdByUser User?         @relation("InvoiceCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  items         InvoiceItem[]
+  payments      Payment[]
+
+  @@unique([clinicId, invoiceNumber])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  clinicId    String   @map("clinic_id")
+  invoiceId   String   @map("invoice_id")
+  serviceName String   @map("service_name")
+  serviceId   String?  @map("service_id")
+  description String?
+  quantity    Int
+  unitPrice   Decimal  @map("unit_price") @db.Decimal(10, 2)
+  lineTotal   Decimal  @map("line_total") @db.Decimal(10, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  clinic      Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  service     Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  clinicId       String        @map("clinic_id")
+  invoiceId      String        @map("invoice_id")
+  patientId      String        @map("patient_id")
+  amount         Decimal       @db.Decimal(10, 2)
+  paymentMethod  PaymentMethod @map("payment_method")
+  reference      String?
+  notes          String?
+  paidAt         DateTime      @map("paid_at")
+  recordedBy     String?       @map("recorded_by")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  clinic         Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  invoice        Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  patient        Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  recordedByUser User?         @relation("PaymentRecordedBy", fields: [recordedBy], references: [id], onDelete: SetNull)
+
+  @@map("payments")
+}
+
+model NotificationTemplate {
+  id          String              @id @default(cuid())
+  clinicId    String              @map("clinic_id")
+  name        String
+  channel     NotificationChannel
+  templateKey String              @map("template_key")
+  subject     String?
+  body        String
+  isActive    Boolean             @default(true) @map("is_active")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+  clinic      Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@unique([clinicId, templateKey, channel])
+  @@map("notification_templates")
+}
+
+model Notification {
+  id            String              @id @default(cuid())
+  clinicId      String              @map("clinic_id")
+  patientId     String?             @map("patient_id")
+  appointmentId String?             @map("appointment_id")
+  channel       NotificationChannel
+  templateKey   String?             @map("template_key")
+  messageBody   String              @map("message_body")
+  status        NotificationStatus
+  scheduledFor  DateTime?           @map("scheduled_for")
+  sentAt        DateTime?           @map("sent_at")
+  errorMessage  String?             @map("error_message")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+  clinic        Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient       Patient?            @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  appointment   Appointment?        @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}
+
+model StaffInvitation {
+  id            String                @id @default(cuid())
+  clinicId      String                @map("clinic_id")
+  email         String
+  role          UserRole
+  token         String                @unique
+  status        StaffInvitationStatus
+  expiresAt     DateTime              @map("expires_at")
+  invitedBy     String?               @map("invited_by")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+  clinic        Clinic                @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  invitedByUser User?                 @relation("StaffInvitationInvitedBy", fields: [invitedBy], references: [id], onDelete: SetNull)
+
+  @@unique([clinicId, email])
+  @@map("staff_invitations")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  clinicId      String   @map("clinic_id")
+  userId        String?  @map("user_id")
+  entityType    String   @map("entity_type")
+  entityId      String   @map("entity_id")
+  action        String
+  oldValuesJson Json?    @map("old_values_json")
+  newValuesJson Json?    @map("new_values_json")
+  ipAddress     String?  @map("ip_address")
+  createdAt     DateTime @default(now()) @map("created_at")
+  clinic        Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model DentalRecord {
+  id               String    @id @default(cuid())
+  clinicId         String    @map("clinic_id")
+  patientId        String    @map("patient_id")
+  dentistId        String    @map("dentist_id")
+  appointmentId    String?   @map("appointment_id")
+  chiefComplaint   String?   @map("chief_complaint")
+  examinationNotes String?   @map("examination_notes")
+  diagnosis        String?
+  procedureDone    String?   @map("procedure_done")
+  prescription     String?
+  followUpNotes    String?   @map("follow_up_notes")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  clinic           Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient          Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  dentist          Dentist   @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  appointment      Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([clinicId, patientId])
+  @@map("dental_records")
+}
+
+model ToothRecord {
+  id          String            @id @default(cuid())
+  clinicId    String            @map("clinic_id")
+  patientId   String            @map("patient_id")
+  toothNumber String            @map("tooth_number")
+  status      ToothRecordStatus
+  notes       String?
+  updatedBy   String?           @map("updated_by")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+  clinic      Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  updatedByUser User?           @relation("ToothRecordUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@unique([patientId, toothNumber])
+  @@index([clinicId, patientId])
+  @@map("tooth_records")
+}
+
+model TreatmentPlan {
+  id                 String              @id @default(cuid())
+  clinicId           String              @map("clinic_id")
+  patientId          String              @map("patient_id")
+  dentistId          String              @map("dentist_id")
+  title              String
+  description        String?
+  status             TreatmentPlanStatus
+  estimatedTotalCost Decimal             @map("estimated_total_cost") @db.Decimal(10, 2)
+  approvedAt         DateTime?           @map("approved_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  clinic             Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient            Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  dentist            Dentist             @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  items              TreatmentPlanItem[]
+  invoices           Invoice[]
+
+  @@index([clinicId, patientId])
+  @@map("treatment_plans")
+}
+
+model TreatmentPlanItem {
+  id              String              @id @default(cuid())
+  clinicId        String              @map("clinic_id")
+  treatmentPlanId String              @map("treatment_plan_id")
+  serviceId       String?             @map("service_id")
+  toothNumber     String?             @map("tooth_number")
+  description     String?
+  estimatedCost   Decimal             @map("estimated_cost") @db.Decimal(10, 2)
+  status          TreatmentPlanStatus
+  sessionOrder    Int                 @map("session_order")
+  plannedDate     DateTime?           @map("planned_date")
+  completedAt     DateTime?           @map("completed_at")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  clinic          Clinic              @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  treatmentPlan   TreatmentPlan       @relation(fields: [treatmentPlanId], references: [id], onDelete: Cascade)
+  service         Service?            @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([clinicId, treatmentPlanId])
+  @@map("treatment_plan_items")
+}
+
+model Subscription {
+  id           String             @id @default(cuid())
+  clinicId     String             @map("clinic_id")
+  planName     String             @map("plan_name")
+  status       SubscriptionStatus
+  startsAt     DateTime           @map("starts_at")
+  endsAt       DateTime?          @map("ends_at")
+  billingCycle BillingCycle       @map("billing_cycle")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  clinic       Clinic             @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, status])
+  @@map("subscriptions")
+}

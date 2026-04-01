@@ -1,0 +1,13 @@
+.next
+node_modules
+.env
+.env.local
+.env.production
+dist
+coverage
+*.log
+.DS_Store
+cookies.txt
+.codex-*
+.next-start.err
+.next-start.log
