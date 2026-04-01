@@ -6,6 +6,7 @@ import { buildLoginRedirectPath } from "@/lib/auth/redirects";
 const publicPaths = [
   "/",
   "/features",
+  "/pricing",
   "/contact",
   "/login",
   "/register-clinic",
