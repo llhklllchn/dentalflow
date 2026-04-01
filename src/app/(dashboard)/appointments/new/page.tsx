@@ -2,12 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AppointmentForm } from "@/components/appointments/appointment-form";
+import { FormGuidePanel } from "@/components/shared/form-guide-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { createAppointment } from "@/features/appointments/actions/create-appointment";
 import { getDentistsList } from "@/features/dentists/queries/get-dentists-list";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { getServicesList } from "@/features/services-catalog/queries/get-services-list";
 import { requirePermission } from "@/lib/auth/guards";
+import { getFormGuide } from "@/lib/constants/form-guides";
 
 type NewAppointmentPageProps = {
   searchParams?: Promise<{
@@ -20,6 +22,7 @@ export default async function NewAppointmentPage({
 }: NewAppointmentPageProps) {
   const resolvedSearchParams = await searchParams;
   await requirePermission("appointments:*");
+  const formGuide = getFormGuide("appointment");
 
   const [patients, dentists, services] = await Promise.all([
     getPatientsList(),
@@ -83,6 +86,8 @@ export default async function NewAppointmentPage({
           </>
         }
       />
+
+      <FormGuidePanel guide={formGuide} />
 
       <AppointmentForm
         patients={patients}

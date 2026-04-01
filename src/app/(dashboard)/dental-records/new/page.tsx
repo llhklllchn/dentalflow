@@ -2,11 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { DentalRecordForm } from "@/components/dental-records/dental-record-form";
+import { FormGuidePanel } from "@/components/shared/form-guide-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { createDentalRecord } from "@/features/dental-records/actions/create-dental-record";
 import { getDentistsList } from "@/features/dentists/queries/get-dentists-list";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { requirePermission } from "@/lib/auth/guards";
+import { getFormGuide } from "@/lib/constants/form-guides";
 
 type NewDentalRecordPageProps = {
   searchParams?: Promise<{
@@ -19,6 +21,7 @@ export default async function NewDentalRecordPage({
 }: NewDentalRecordPageProps) {
   const resolvedSearchParams = await searchParams;
   await requirePermission("dental-records:*");
+  const formGuide = getFormGuide("dental-record");
 
   const [patients, dentists] = await Promise.all([
     getPatientsList(),
@@ -81,6 +84,8 @@ export default async function NewDentalRecordPage({
           </>
         }
       />
+
+      <FormGuidePanel guide={formGuide} />
 
       <DentalRecordForm
         patients={patients}

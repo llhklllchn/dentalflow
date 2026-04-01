@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { FormGuidePanel } from "@/components/shared/form-guide-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { TreatmentPlanForm } from "@/components/treatment-plans/treatment-plan-form";
 import { getDentistsList } from "@/features/dentists/queries/get-dentists-list";
@@ -8,6 +9,7 @@ import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { getServicesList } from "@/features/services-catalog/queries/get-services-list";
 import { createTreatmentPlan } from "@/features/treatment-plans/actions/create-treatment-plan";
 import { requirePermission } from "@/lib/auth/guards";
+import { getFormGuide } from "@/lib/constants/form-guides";
 
 type NewTreatmentPlanPageProps = {
   searchParams?: Promise<{
@@ -20,6 +22,7 @@ export default async function NewTreatmentPlanPage({
 }: NewTreatmentPlanPageProps) {
   const resolvedSearchParams = await searchParams;
   await requirePermission("treatment-plans:*");
+  const formGuide = getFormGuide("treatment-plan");
 
   const [patients, dentists, services] = await Promise.all([
     getPatientsList(),
@@ -82,6 +85,8 @@ export default async function NewTreatmentPlanPage({
           </>
         }
       />
+
+      <FormGuidePanel guide={formGuide} />
 
       <TreatmentPlanForm
         patients={patients}

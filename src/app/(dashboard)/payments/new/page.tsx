@@ -2,11 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PaymentForm } from "@/components/billing/payment-form";
+import { FormGuidePanel } from "@/components/shared/form-guide-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { getInvoicesList } from "@/features/invoices/queries/get-invoices-list";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { recordPayment } from "@/features/payments/actions/record-payment";
 import { requirePermission } from "@/lib/auth/guards";
+import { getFormGuide } from "@/lib/constants/form-guides";
 
 type NewPaymentPageProps = {
   searchParams?: Promise<{
@@ -18,6 +20,7 @@ type NewPaymentPageProps = {
 export default async function NewPaymentPage({ searchParams }: NewPaymentPageProps) {
   const resolvedSearchParams = await searchParams;
   await requirePermission("payments:*");
+  const formGuide = getFormGuide("payment");
 
   const [patients, invoices] = await Promise.all([getPatientsList(), getInvoicesList()]);
   const selectedInvoice = invoices.find(
@@ -76,6 +79,8 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
           </>
         }
       />
+
+      <FormGuidePanel guide={formGuide} />
 
       <PaymentForm
         patients={patients}

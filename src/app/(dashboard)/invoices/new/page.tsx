@@ -2,11 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { InvoiceForm } from "@/components/billing/invoice-form";
+import { FormGuidePanel } from "@/components/shared/form-guide-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { createInvoice } from "@/features/invoices/actions/create-invoice";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { getServicesList } from "@/features/services-catalog/queries/get-services-list";
 import { requirePermission } from "@/lib/auth/guards";
+import { getFormGuide } from "@/lib/constants/form-guides";
 
 type NewInvoicePageProps = {
   searchParams?: Promise<{
@@ -17,6 +19,7 @@ type NewInvoicePageProps = {
 export default async function NewInvoicePage({ searchParams }: NewInvoicePageProps) {
   const resolvedSearchParams = await searchParams;
   await requirePermission("invoices:*");
+  const formGuide = getFormGuide("invoice");
 
   const [patients, services] = await Promise.all([getPatientsList(), getServicesList()]);
 
@@ -84,6 +87,8 @@ export default async function NewInvoicePage({ searchParams }: NewInvoicePagePro
           </>
         }
       />
+
+      <FormGuidePanel guide={formGuide} />
 
       <InvoiceForm
         patients={patients}

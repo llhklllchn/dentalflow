@@ -2,10 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PatientForm } from "@/components/patients/patient-form";
+import { FormGuidePanel } from "@/components/shared/form-guide-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { createPatient } from "@/features/patients/actions/create-patient";
 import { saveMedicalHistory } from "@/features/patients/actions/save-medical-history";
 import { requirePermission } from "@/lib/auth/guards";
+import { getFormGuide } from "@/lib/constants/form-guides";
 
 type NewPatientPageProps = {
   searchParams?: Promise<{
@@ -16,6 +18,7 @@ type NewPatientPageProps = {
 export default async function NewPatientPage({ searchParams }: NewPatientPageProps) {
   const resolvedSearchParams = await searchParams;
   await requirePermission("patients:*");
+  const formGuide = getFormGuide("patient");
 
   async function submitPatientForm(formData: FormData) {
     "use server";
@@ -99,6 +102,8 @@ export default async function NewPatientPage({ searchParams }: NewPatientPagePro
           </>
         }
       />
+
+      <FormGuidePanel guide={formGuide} />
 
       <PatientForm action={submitPatientForm} notice={resolvedSearchParams?.error} />
     </div>
