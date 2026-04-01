@@ -8,7 +8,10 @@ import { PrintButton } from "@/components/shared/print-button";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { updateAppointmentStatus } from "@/features/appointments/actions/update-appointment-status";
-import { getAppointmentsBoard } from "@/features/appointments/queries/get-appointments-board";
+import {
+  AppointmentsBoardItem,
+  getAppointmentsBoard
+} from "@/features/appointments/queries/get-appointments-board";
 import { requirePermission } from "@/lib/auth/guards";
 import { getAppointmentStatusOptions } from "@/lib/domain/labels";
 import { hasPermission } from "@/lib/permissions/permissions";
@@ -89,7 +92,7 @@ export default async function AppointmentsPage({
   const search = resolvedSearchParams?.search?.trim();
   const status = resolvedSearchParams?.status ?? "all";
   const hasFilters = Boolean(search || status !== "all");
-  const appointments = await getAppointmentsBoard({
+  const appointments: AppointmentsBoardItem[] = await getAppointmentsBoard({
     search,
     status
   });

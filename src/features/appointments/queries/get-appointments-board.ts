@@ -14,7 +14,19 @@ type GetAppointmentsBoardOptions = {
   status?: AppointmentStatus | "all";
 };
 
-export async function getAppointmentsBoard(options?: GetAppointmentsBoardOptions) {
+export type AppointmentsBoardItem = {
+  id: string;
+  patientId: string;
+  patient: string;
+  dentist: string;
+  service: string;
+  time: string;
+  status: AppointmentStatus;
+};
+
+export async function getAppointmentsBoard(
+  options?: GetAppointmentsBoardOptions
+): Promise<AppointmentsBoardItem[]> {
   const search = options?.search?.trim();
   const status = options?.status;
 
