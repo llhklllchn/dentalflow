@@ -81,6 +81,7 @@ export type AppointmentBoardItem = {
   id: string;
   patientId: string;
   dentistId?: string;
+  patientPhone?: string;
   patient: string;
   dentist: string;
   service: string;
@@ -461,6 +462,7 @@ export const appointmentsBoard: AppointmentBoardItem[] = [
     id: "apt_001",
     patientId: "pat_001",
     dentistId: "den_001",
+    patientPhone: "+962790000001",
     patient: "سارة علي",
     dentist: "د. ليث",
     service: "تنظيف",
@@ -472,6 +474,7 @@ export const appointmentsBoard: AppointmentBoardItem[] = [
     id: "apt_002",
     patientId: "pat_002",
     dentistId: "den_002",
+    patientPhone: "+962790000002",
     patient: "محمد خليل",
     dentist: "د. هناء",
     service: "علاج عصب",
@@ -483,6 +486,7 @@ export const appointmentsBoard: AppointmentBoardItem[] = [
     id: "apt_003",
     patientId: "pat_003",
     dentistId: "den_001",
+    patientPhone: "+962790000003",
     patient: "لجين أحمد",
     dentist: "د. ليث",
     service: "فحص",

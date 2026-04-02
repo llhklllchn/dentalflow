@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ActionPromptCard } from "@/components/shared/action-prompt-card";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
+import { ContactActions } from "@/components/shared/contact-actions";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { SearchResultCard } from "@/components/shared/search-result-card";
@@ -590,6 +591,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   </span>
                 }
                 actions={getPatientResultActions(patient, permissions)}
+                footer={
+                  <ContactActions
+                    phone={patient.phone}
+                    message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}
+                  />
+                }
               />
             ))}
           </div>
@@ -613,6 +620,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 subtitle={`${appointment.service} | ${appointment.dentist} | ${appointment.time}`}
                 badge={<StatusBadge status={appointment.status as BadgeStatus} />}
                 actions={getAppointmentResultActions(appointment, permissions)}
+                footer={
+                  <ContactActions
+                    phone={appointment.patientPhone}
+                    message={`مرحبًا ${appointment.patient}، نود تذكيرك بموعدك مع ${appointment.dentist}.`}
+                  />
+                }
               />
             ))}
           </div>

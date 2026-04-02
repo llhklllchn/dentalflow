@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
+import { ContactActions } from "@/components/shared/contact-actions";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
@@ -438,6 +439,10 @@ export default async function AppointmentsPage({
                   </div>
 
                   <ActionLinkStrip items={getAppointmentActionItems(appointment)} />
+                  <ContactActions
+                    phone={appointment.patientPhone}
+                    message={`مرحبًا ${appointment.patient}، نود تذكيرك بموعدك مع ${appointment.dentist}.`}
+                  />
                 </div>
               );
             })}

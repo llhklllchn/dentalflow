@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
+import { ContactActions } from "@/components/shared/contact-actions";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
@@ -331,6 +332,10 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                     </div>
 
                     <ActionLinkStrip items={getPatientActionItems(patient.id)} />
+                    <ContactActions
+                      phone={patient.phone}
+                      message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}
+                    />
                   </div>
                 );
               })}
@@ -391,6 +396,10 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                             ) : null}
                           </div>
                           <ActionLinkStrip items={getPatientActionItems(patient.id)} />
+                          <ContactActions
+                            phone={patient.phone}
+                            message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}
+                          />
                         </td>
                       </tr>
                     );

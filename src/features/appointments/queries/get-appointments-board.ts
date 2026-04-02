@@ -24,6 +24,7 @@ export type AppointmentsBoardItem = {
   id: string;
   patientId: string;
   dentistId?: string;
+  patientPhone?: string;
   patient: string;
   dentist: string;
   service: string;
@@ -160,6 +161,7 @@ export async function getAppointmentsBoard(
         id: appointment.id,
         patientId: appointment.patientId,
         dentistId: appointment.dentistId,
+        patientPhone: appointment.patient.phone,
         patient: formatFullName(appointment.patient.firstName, appointment.patient.lastName),
         dentist: formatFullName(
           appointment.dentist.user.firstName,

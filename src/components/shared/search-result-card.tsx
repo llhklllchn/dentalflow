@@ -9,6 +9,7 @@ type SearchResultCardProps = {
   subtitle: string;
   badge?: ReactNode;
   actions?: ActionLinkItem[];
+  footer?: ReactNode;
 };
 
 export function SearchResultCard({
@@ -16,7 +17,8 @@ export function SearchResultCard({
   href,
   subtitle,
   badge,
-  actions = []
+  actions = [],
+  footer
 }: SearchResultCardProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 transition hover:border-brand-200 hover:bg-brand-50/40">
@@ -31,6 +33,7 @@ export function SearchResultCard({
       </div>
 
       <ActionLinkStrip items={actions} />
+      {footer}
     </div>
   );
 }
