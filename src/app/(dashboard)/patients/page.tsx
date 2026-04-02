@@ -5,6 +5,7 @@ import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
 import { ContactActions } from "@/components/shared/contact-actions";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
+import { NextStepCallout } from "@/components/shared/next-step-callout";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { QuickFilterStrip } from "@/components/shared/quick-filter-strip";
@@ -15,6 +16,7 @@ import { archivePatient } from "@/features/patients/actions/archive-patient";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { requirePermission } from "@/lib/auth/guards";
 import { hasPermission } from "@/lib/permissions/permissions";
+import { getPatientNextStep } from "@/lib/recommendations/next-step";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { normalizePatientSegment } from "@/lib/filters/list-presets";
 import {
@@ -153,6 +155,37 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
       label: string;
       tone?: "default" | "brand" | "emerald";
     }>;
+  }
+
+  function getPatientRecommendation(patient: (typeof patients)[number]) {
+    const suggestion = getPatientNextStep({
+      balance: patient.balance,
+      lastVisit: patient.lastVisit
+    });
+
+    const action =
+      suggestion.actionKey === "new_appointment" && canCreateAppointments
+        ? {
+            href: buildAppointmentCreatePath({ patientId: patient.id }),
+            label: "ابدأ الموعد الأول"
+          }
+        : suggestion.actionKey === "new_record" && canCreateRecords
+          ? {
+              href: buildDentalRecordCreatePath({ patientId: patient.id }),
+              label: "افتح السجل الطبي"
+            }
+          : suggestion.actionKey === "open_patient"
+            ? {
+                href: `/patients/${patient.id}`,
+                label: "افتح الملف"
+              }
+            : undefined;
+
+    return {
+      ...suggestion,
+      actionHref: action?.href,
+      actionLabel: action?.label
+    };
   }
 
   async function archivePatientFromList(formData: FormData) {
@@ -332,6 +365,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                     </div>
 
                     <ActionLinkStrip items={getPatientActionItems(patient.id)} />
+                    <NextStepCallout {...getPatientRecommendation(patient)} />
                     <ContactActions
                       phone={patient.phone}
                       message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}
@@ -396,6 +430,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                             ) : null}
                           </div>
                           <ActionLinkStrip items={getPatientActionItems(patient.id)} />
+                          <NextStepCallout {...getPatientRecommendation(patient)} />
                           <ContactActions
                             phone={patient.phone}
                             message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}

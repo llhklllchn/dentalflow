@@ -5,6 +5,7 @@ import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
 import { ContactActions } from "@/components/shared/contact-actions";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
+import { NextStepCallout } from "@/components/shared/next-step-callout";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { QuickFilterStrip } from "@/components/shared/quick-filter-strip";
@@ -27,6 +28,7 @@ import {
   buildTreatmentPlanCreatePath
 } from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
+import { getAppointmentNextStep } from "@/lib/recommendations/next-step";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 import { AppointmentStatus } from "@/types/domain";
 
@@ -213,6 +215,48 @@ export default async function AppointmentsPage({
       label: string;
       tone?: "default" | "brand" | "emerald";
     }>;
+  }
+
+  function getAppointmentRecommendation(appointment: AppointmentsBoardItem) {
+    const suggestion = getAppointmentNextStep(appointment.status);
+
+    const action =
+      suggestion.actionKey === "new_record" && canCreateRecords
+        ? {
+            href: buildDentalRecordCreatePath({
+              patientId: appointment.patientId,
+              dentistId: appointment.dentistId,
+              appointmentDate: appointment.appointmentDate
+            }),
+            label: "ابدأ السجل الطبي"
+          }
+        : suggestion.actionKey === "new_invoice" && canCreateInvoices
+          ? {
+              href: buildInvoiceCreatePath({
+                patientId: appointment.patientId,
+                serviceName: appointment.service
+              }),
+              label: "أنشئ الفاتورة"
+            }
+          : suggestion.actionKey === "new_appointment" && canManageAppointments
+            ? {
+                href: buildQueryPath("/appointments/new", {
+                  patientId: appointment.patientId
+                }),
+                label: "أعد الحجز"
+              }
+            : suggestion.actionKey === "open_patient"
+              ? {
+                  href: `/patients/${appointment.patientId}`,
+                  label: "افتح ملف المريض"
+                }
+              : undefined;
+
+    return {
+      ...suggestion,
+      actionHref: action?.href,
+      actionLabel: action?.label
+    };
   }
 
   async function submitStatusChange(formData: FormData) {
@@ -439,6 +483,7 @@ export default async function AppointmentsPage({
                   </div>
 
                   <ActionLinkStrip items={getAppointmentActionItems(appointment)} />
+                  <NextStepCallout {...getAppointmentRecommendation(appointment)} />
                   <ContactActions
                     phone={appointment.patientPhone}
                     message={`مرحبًا ${appointment.patient}، نود تذكيرك بموعدك مع ${appointment.dentist}.`}

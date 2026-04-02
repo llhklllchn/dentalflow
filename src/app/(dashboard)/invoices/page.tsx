@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
+import { NextStepCallout } from "@/components/shared/next-step-callout";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { QuickFilterStrip } from "@/components/shared/quick-filter-strip";
@@ -18,6 +19,7 @@ import { getInvoiceStatusOptions } from "@/lib/domain/labels";
 import { normalizeInvoiceView } from "@/lib/filters/list-presets";
 import { buildPaymentCreatePath, buildQueryPath } from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
+import { getInvoiceNextStep } from "@/lib/recommendations/next-step";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 import { InvoiceStatus } from "@/types/domain";
 
@@ -132,6 +134,37 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
       label: string;
       tone?: "default" | "brand" | "emerald";
     }>;
+  }
+
+  function getInvoiceRecommendation(invoice: (typeof invoices)[number]) {
+    const suggestion = getInvoiceNextStep({
+      status: invoice.status,
+      balance: invoice.balance
+    });
+
+    const action =
+      suggestion.actionKey === "record_payment" &&
+      canRecordPayments &&
+      invoice.status !== "cancelled"
+        ? {
+            href: buildPaymentCreatePath({
+              invoiceId: invoice.id,
+              patientId: invoice.patientId
+            }),
+            label: "سجل الدفعة الآن"
+          }
+        : suggestion.actionKey === "open_patient" && canViewPatients
+          ? {
+              href: `/patients/${invoice.patientId}`,
+              label: "افتح ملف المريض"
+            }
+          : undefined;
+
+    return {
+      ...suggestion,
+      actionHref: action?.href,
+      actionLabel: action?.label
+    };
   }
 
   async function submitStatusForm(formData: FormData) {
@@ -338,6 +371,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                   </div>
 
                   <ActionLinkStrip items={getInvoiceActionItems(invoice)} />
+                  <NextStepCallout {...getInvoiceRecommendation(invoice)} />
                 </div>
               ))}
             </div>
@@ -401,6 +435,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                           ) : null}
                         </div>
                         <ActionLinkStrip items={getInvoiceActionItems(invoice)} />
+                        <NextStepCallout {...getInvoiceRecommendation(invoice)} />
                       </td>
                     </tr>
                   ))}
