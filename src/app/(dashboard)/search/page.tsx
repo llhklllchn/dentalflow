@@ -12,6 +12,11 @@ import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getGlobalSearchResults } from "@/features/search/queries/get-global-search-results";
 import { requireSession } from "@/lib/auth/guards";
+import {
+  getAppointmentMessagePresets,
+  getInvoiceMessagePresets,
+  getPatientMessagePresets
+} from "@/lib/contact/message-templates";
 import { hasPermission } from "@/lib/permissions/permissions";
 import {
   buildAppointmentCreatePath,
@@ -594,7 +599,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 footer={
                   <ContactActions
                     phone={patient.phone}
-                    message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}
+                    presets={getPatientMessagePresets({
+                      patientName: patient.fullName,
+                      balance: patient.balance,
+                      lastVisit: patient.lastVisit
+                    })}
                   />
                 }
               />
@@ -623,7 +632,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 footer={
                   <ContactActions
                     phone={appointment.patientPhone}
-                    message={`مرحبًا ${appointment.patient}، نود تذكيرك بموعدك مع ${appointment.dentist}.`}
+                    presets={getAppointmentMessagePresets({
+                      patientName: appointment.patient,
+                      dentistName: appointment.dentist,
+                      service: appointment.service,
+                      time: appointment.time
+                    })}
                   />
                 }
               />
@@ -649,6 +663,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 subtitle={`${invoice.patient} | الإجمالي: ${invoice.total} | المتبقي: ${invoice.balance}`}
                 badge={<StatusBadge status={invoice.status as BadgeStatus} />}
                 actions={getInvoiceResultActions(invoice, permissions)}
+                footer={
+                  <ContactActions
+                    phone={invoice.patientPhone}
+                    presets={getInvoiceMessagePresets({
+                      patientName: invoice.patient,
+                      invoiceId: invoice.id,
+                      balance: invoice.balance,
+                      status: invoice.status
+                    })}
+                  />
+                }
               />
             ))}
           </div>

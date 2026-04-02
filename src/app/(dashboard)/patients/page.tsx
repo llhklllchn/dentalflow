@@ -15,6 +15,7 @@ import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
 import { archivePatient } from "@/features/patients/actions/archive-patient";
 import { getPatientsList } from "@/features/patients/queries/get-patients-list";
 import { requirePermission } from "@/lib/auth/guards";
+import { getPatientMessagePresets } from "@/lib/contact/message-templates";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { getPatientNextStep } from "@/lib/recommendations/next-step";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
@@ -368,7 +369,11 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                     <NextStepCallout {...getPatientRecommendation(patient)} />
                     <ContactActions
                       phone={patient.phone}
-                      message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}
+                      presets={getPatientMessagePresets({
+                        patientName: patient.fullName,
+                        balance: patient.balance,
+                        lastVisit: patient.lastVisit
+                      })}
                     />
                   </div>
                 );
@@ -433,7 +438,11 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                           <NextStepCallout {...getPatientRecommendation(patient)} />
                           <ContactActions
                             phone={patient.phone}
-                            message={`مرحبًا ${patient.fullName}، هذه رسالة من عيادتكم بخصوص المتابعة.`}
+                            presets={getPatientMessagePresets({
+                              patientName: patient.fullName,
+                              balance: patient.balance,
+                              lastVisit: patient.lastVisit
+                            })}
                           />
                         </td>
                       </tr>

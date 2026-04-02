@@ -138,6 +138,7 @@ export async function getInvoicesList(
       return records.map((invoice) => ({
         id: invoice.invoiceNumber,
         patientId: invoice.patientId,
+        patientPhone: invoice.patient.phone,
         patient: formatFullName(invoice.patient.firstName, invoice.patient.lastName),
         total: formatCurrency(invoice.total, clinic.currency),
         paid: formatCurrency(invoice.paidAmount, clinic.currency),

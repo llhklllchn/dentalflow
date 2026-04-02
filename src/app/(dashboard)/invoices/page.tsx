@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
+import { ContactActions } from "@/components/shared/contact-actions";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { NextStepCallout } from "@/components/shared/next-step-callout";
 import { PageHeader } from "@/components/shared/page-header";
@@ -14,6 +15,7 @@ import { WorkflowGuidePanel } from "@/components/shared/workflow-guide-panel";
 import { setInvoiceStatus } from "@/features/invoices/actions/set-invoice-status";
 import { getInvoicesList } from "@/features/invoices/queries/get-invoices-list";
 import { requirePermission } from "@/lib/auth/guards";
+import { getInvoiceMessagePresets } from "@/lib/contact/message-templates";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getInvoiceStatusOptions } from "@/lib/domain/labels";
 import { normalizeInvoiceView } from "@/lib/filters/list-presets";
@@ -372,6 +374,15 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
                   <ActionLinkStrip items={getInvoiceActionItems(invoice)} />
                   <NextStepCallout {...getInvoiceRecommendation(invoice)} />
+                  <ContactActions
+                    phone={invoice.patientPhone}
+                    presets={getInvoiceMessagePresets({
+                      patientName: invoice.patient,
+                      invoiceId: invoice.id,
+                      balance: invoice.balance,
+                      status: invoice.status
+                    })}
+                  />
                 </div>
               ))}
             </div>
@@ -436,6 +447,15 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                         </div>
                         <ActionLinkStrip items={getInvoiceActionItems(invoice)} />
                         <NextStepCallout {...getInvoiceRecommendation(invoice)} />
+                        <ContactActions
+                          phone={invoice.patientPhone}
+                          presets={getInvoiceMessagePresets({
+                            patientName: invoice.patient,
+                            invoiceId: invoice.id,
+                            balance: invoice.balance,
+                            status: invoice.status
+                          })}
+                        />
                       </td>
                     </tr>
                   ))}

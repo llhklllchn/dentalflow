@@ -93,6 +93,7 @@ export type AppointmentBoardItem = {
 export type InvoiceDetails = {
   id: string;
   patientId: string;
+  patientPhone: string;
   patient: string;
   subtotal?: string;
   discount?: string;
@@ -497,10 +498,11 @@ export const appointmentsBoard: AppointmentBoardItem[] = [
 ];
 
 export const invoices: InvoiceDetails[] = [
-  {
-    id: "inv_001",
-    patientId: "pat_001",
-    patient: "سارة علي",
+    {
+      id: "inv_001",
+      patientId: "pat_001",
+      patientPhone: "+962790000001",
+      patient: "سارة علي",
     subtotal: "160 JOD",
     discount: "0 JOD",
     tax: "0 JOD",
@@ -526,10 +528,11 @@ export const invoices: InvoiceDetails[] = [
       }
     ]
   },
-  {
-    id: "inv_002",
-    patientId: "pat_002",
-    patient: "محمد خليل",
+    {
+      id: "inv_002",
+      patientId: "pat_002",
+      patientPhone: "+962790000002",
+      patient: "محمد خليل",
     subtotal: "120 JOD",
     discount: "0 JOD",
     tax: "0 JOD",
@@ -551,10 +554,11 @@ export const invoices: InvoiceDetails[] = [
     notes: "فاتورة مدفوعة بالكامل.",
     items: [{ name: "علاج عصب", quantity: 1, unitPrice: "120 JOD", total: "120 JOD" }]
   },
-  {
-    id: "inv_003",
-    patientId: "pat_003",
-    patient: "لجين أحمد",
+    {
+      id: "inv_003",
+      patientId: "pat_003",
+      patientPhone: "+962790000003",
+      patient: "لجين أحمد",
     subtotal: "80 JOD",
     discount: "0 JOD",
     tax: "0 JOD",

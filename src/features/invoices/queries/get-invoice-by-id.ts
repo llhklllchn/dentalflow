@@ -18,8 +18,26 @@ export async function getInvoiceById(invoiceId: string) {
 
       return {
         lookupId: invoice.id,
-        ...invoice,
-        paymentHistory: invoice.paymentHistory ?? []
+        id: invoice.id,
+        patientId: invoice.patientId,
+        patientPhone: invoice.patientPhone,
+        patient: invoice.patient,
+        subtotal: invoice.subtotal ?? invoice.total,
+        discount: invoice.discount ?? "0 JOD",
+        tax: invoice.tax ?? "0 JOD",
+        total: invoice.total,
+        paid: invoice.paid,
+        balance: invoice.balance,
+        status: invoice.status,
+        issueDate: invoice.issueDate,
+        dueDate: invoice.dueDate ?? invoice.issueDate,
+        notes: invoice.notes ?? "",
+        treatmentPlanTitle: invoice.treatmentPlanTitle ?? "",
+        items: invoice.items,
+        paymentHistory: (invoice.paymentHistory ?? []).map((payment) => ({
+          ...payment,
+          notes: payment.notes ?? ""
+        }))
       };
     },
     live: async () => {
@@ -65,6 +83,7 @@ export async function getInvoiceById(invoiceId: string) {
         lookupId: invoice.id,
         id: invoice.invoiceNumber,
         patientId: invoice.patientId,
+        patientPhone: invoice.patient.phone,
         patient: formatFullName(invoice.patient.firstName, invoice.patient.lastName),
         subtotal: formatCurrency(invoice.subtotal, clinic.currency),
         discount: formatCurrency(invoice.discount, clinic.currency),

@@ -18,6 +18,7 @@ import {
   getAppointmentsBoard
 } from "@/features/appointments/queries/get-appointments-board";
 import { requirePermission } from "@/lib/auth/guards";
+import { getAppointmentMessagePresets } from "@/lib/contact/message-templates";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getAppointmentStatusOptions } from "@/lib/domain/labels";
 import { normalizeAppointmentView } from "@/lib/filters/list-presets";
@@ -486,7 +487,12 @@ export default async function AppointmentsPage({
                   <NextStepCallout {...getAppointmentRecommendation(appointment)} />
                   <ContactActions
                     phone={appointment.patientPhone}
-                    message={`مرحبًا ${appointment.patient}، نود تذكيرك بموعدك مع ${appointment.dentist}.`}
+                    presets={getAppointmentMessagePresets({
+                      patientName: appointment.patient,
+                      dentistName: appointment.dentist,
+                      service: appointment.service,
+                      time: appointment.time
+                    })}
                   />
                 </div>
               );
