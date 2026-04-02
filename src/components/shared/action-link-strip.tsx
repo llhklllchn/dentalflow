@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-type ActionLinkItem = {
+export type ActionLinkItem = {
   href: string;
   label: string;
   tone?: "default" | "brand" | "emerald";

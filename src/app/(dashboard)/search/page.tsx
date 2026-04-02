@@ -1,14 +1,24 @@
+import { ActionLinkItem } from "@/components/shared/action-link-strip";
 import Link from "next/link";
 
 import { ActionPromptCard } from "@/components/shared/action-prompt-card";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
+import { SearchResultCard } from "@/components/shared/search-result-card";
 import { SignalCard } from "@/components/shared/signal-card";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getGlobalSearchResults } from "@/features/search/queries/get-global-search-results";
 import { requireSession } from "@/lib/auth/guards";
+import { hasPermission } from "@/lib/permissions/permissions";
+import {
+  buildAppointmentCreatePath,
+  buildDentalRecordCreatePath,
+  buildInvoiceCreatePath,
+  buildPaymentCreatePath,
+  buildTreatmentPlanCreatePath
+} from "@/lib/navigation/create-flow";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 
 type SearchPageProps = {
@@ -32,6 +42,14 @@ type SearchSignal = {
   tone: "brand" | "emerald" | "amber" | "rose" | "slate";
 };
 type BadgeStatus = Parameters<typeof StatusBadge>[0]["status"];
+type SearchActionPermissions = {
+  canViewPatients: boolean;
+  canCreateAppointments: boolean;
+  canManageInvoices: boolean;
+  canRecordPayments: boolean;
+  canCreateRecords: boolean;
+  canCreatePlans: boolean;
+};
 
 const paymentMethodLabels = {
   cash: "نقدًا",
@@ -189,6 +207,149 @@ function getExportRows(results: SearchResults) {
   ];
 }
 
+function getPatientResultActions(
+  patient: SearchResults["patients"][number],
+  permissions: SearchActionPermissions
+): ActionLinkItem[] {
+  return [
+    permissions.canCreateAppointments
+      ? {
+          href: buildAppointmentCreatePath({ patientId: patient.id }),
+          label: "موعد جديد",
+          tone: "brand"
+        }
+      : null,
+    permissions.canManageInvoices
+      ? {
+          href: buildInvoiceCreatePath({ patientId: patient.id }),
+          label: "فاتورة"
+        }
+      : null,
+    permissions.canCreateRecords
+      ? {
+          href: buildDentalRecordCreatePath({ patientId: patient.id }),
+          label: "سجل طبي"
+        }
+      : null,
+    permissions.canCreatePlans
+      ? {
+          href: buildTreatmentPlanCreatePath({ patientId: patient.id }),
+          label: "خطة علاج",
+          tone: "emerald"
+        }
+      : null
+  ].filter(Boolean) as ActionLinkItem[];
+}
+
+function getAppointmentResultActions(
+  appointment: SearchResults["appointments"][number],
+  permissions: SearchActionPermissions
+): ActionLinkItem[] {
+  return [
+    permissions.canCreateRecords
+      ? {
+          href: buildDentalRecordCreatePath({
+            patientId: appointment.patientId,
+            dentistId: appointment.dentistId,
+            appointmentDate: appointment.appointmentDate
+          }),
+          label: "سجل طبي",
+          tone: "brand"
+        }
+      : null,
+    permissions.canManageInvoices
+      ? {
+          href: buildInvoiceCreatePath({
+            patientId: appointment.patientId,
+            serviceName: appointment.service
+          }),
+          label: "فاتورة"
+        }
+      : null,
+    permissions.canCreatePlans
+      ? {
+          href: buildTreatmentPlanCreatePath({
+            patientId: appointment.patientId,
+            dentistId: appointment.dentistId,
+            serviceName: appointment.service
+          }),
+          label: "خطة علاج",
+          tone: "emerald"
+        }
+      : null
+  ].filter(Boolean) as ActionLinkItem[];
+}
+
+function getInvoiceResultActions(
+  invoice: SearchResults["invoices"][number],
+  permissions: SearchActionPermissions
+): ActionLinkItem[] {
+  return [
+    permissions.canRecordPayments && invoice.status !== "cancelled"
+      ? {
+          href: buildPaymentCreatePath({
+            invoiceId: invoice.id,
+            patientId: invoice.patientId
+          }),
+          label: "تسجيل دفعة",
+          tone: "brand"
+        }
+      : null,
+    permissions.canViewPatients
+      ? {
+          href: `/patients/${invoice.patientId}`,
+          label: "ملف المريض"
+        }
+      : null
+  ].filter(Boolean) as ActionLinkItem[];
+}
+
+function getPaymentResultActions(
+  payment: SearchResults["payments"][number],
+  permissions: SearchActionPermissions
+): ActionLinkItem[] {
+  return [
+    {
+      href: `/invoices/${payment.invoiceId}`,
+      label: "فتح الفاتورة",
+      tone: "brand"
+    },
+    permissions.canViewPatients
+      ? {
+          href: `/patients/${payment.patientId}`,
+          label: "ملف المريض"
+        }
+      : null
+  ].filter(Boolean) as ActionLinkItem[];
+}
+
+function getTreatmentPlanResultActions(
+  plan: SearchResults["treatmentPlans"][number],
+  permissions: SearchActionPermissions
+): ActionLinkItem[] {
+  return [
+    permissions.canViewPatients
+      ? {
+          href: `/patients/${plan.patientId}`,
+          label: "ملف المريض"
+        }
+      : null,
+    permissions.canCreateAppointments
+      ? {
+          href: buildAppointmentCreatePath({ patientId: plan.patientId }),
+          label: "موعد جديد",
+          tone: "brand"
+        }
+      : null,
+    permissions.canManageInvoices
+      ? {
+          href: buildInvoiceCreatePath({ patientId: plan.patientId }),
+          label: "فاتورة"
+        }
+      : null
+  ].filter(Boolean) as ActionLinkItem[];
+}
+
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolvedSearchParams = await searchParams;
   const user = await requireSession();
@@ -208,6 +369,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const actionPrompts = getSearchActionPrompts(results);
   const populatedSections = getPopulatedSections(results);
   const exportRows = getExportRows(results);
+  const permissions: SearchActionPermissions = {
+    canViewPatients: hasPermission(user.role, "patients:view"),
+    canCreateAppointments: hasPermission(user.role, "appointments:*"),
+    canManageInvoices: hasPermission(user.role, "invoices:*"),
+    canRecordPayments: hasPermission(user.role, "payments:*"),
+    canCreateRecords: hasPermission(user.role, "dental-records:*"),
+    canCreatePlans: hasPermission(user.role, "treatment-plans:*")
+  };
 
   return (
     <div>
@@ -410,23 +579,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
           <div className="grid gap-3">
             {results.patients.map((patient) => (
-              <Link
+              <SearchResultCard
                 key={patient.id}
                 href={`/patients/${patient.id}`}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-4 transition hover:border-brand-200 hover:bg-brand-50/40"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="font-semibold text-ink">{patient.fullName}</div>
-                    <div className="mt-1 text-sm text-slate-600">
-                      {patient.phone} | آخر زيارة: {patient.lastVisit} | الرصيد: {patient.balance}
-                    </div>
-                  </div>
+                title={patient.fullName}
+                subtitle={`${patient.phone} | آخر زيارة: ${patient.lastVisit} | الرصيد: ${patient.balance}`}
+                badge={
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
                     {patient.dentistName}
                   </span>
-                </div>
-              </Link>
+                }
+                actions={getPatientResultActions(patient, permissions)}
+              />
             ))}
           </div>
         </section>
@@ -442,21 +606,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
           <div className="grid gap-3">
             {results.appointments.map((appointment) => (
-              <Link
+              <SearchResultCard
                 key={appointment.id}
-                href={`/appointments?search=${encodeURIComponent(appointment.patient)}`}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-4 transition hover:border-brand-200 hover:bg-brand-50/40"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="font-semibold text-ink">{appointment.patient}</div>
-                    <div className="mt-1 text-sm text-slate-600">
-                      {appointment.service} | {appointment.dentist} | {appointment.time}
-                    </div>
-                  </div>
-                  <StatusBadge status={appointment.status as BadgeStatus} />
-                </div>
-              </Link>
+                href={`/patients/${appointment.patientId}`}
+                title={appointment.patient}
+                subtitle={`${appointment.service} | ${appointment.dentist} | ${appointment.time}`}
+                badge={<StatusBadge status={appointment.status as BadgeStatus} />}
+                actions={getAppointmentResultActions(appointment, permissions)}
+              />
             ))}
           </div>
         </section>
@@ -472,21 +629,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
           <div className="grid gap-3">
             {results.invoices.map((invoice) => (
-              <Link
+              <SearchResultCard
                 key={invoice.id}
                 href={`/invoices/${invoice.id}`}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-4 transition hover:border-brand-200 hover:bg-brand-50/40"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="font-semibold text-ink">{invoice.id}</div>
-                    <div className="mt-1 text-sm text-slate-600">
-                      {invoice.patient} | الإجمالي: {invoice.total} | المتبقي: {invoice.balance}
-                    </div>
-                  </div>
-                  <StatusBadge status={invoice.status as BadgeStatus} />
-                </div>
-              </Link>
+                title={invoice.id}
+                subtitle={`${invoice.patient} | الإجمالي: ${invoice.total} | المتبقي: ${invoice.balance}`}
+                badge={<StatusBadge status={invoice.status as BadgeStatus} />}
+                actions={getInvoiceResultActions(invoice, permissions)}
+              />
             ))}
           </div>
         </section>
@@ -502,23 +652,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
           <div className="grid gap-3">
             {results.payments.map((payment) => (
-              <Link
+              <SearchResultCard
                 key={payment.id}
-                href={`/payments?search=${encodeURIComponent(payment.patient)}`}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-4 transition hover:border-brand-200 hover:bg-brand-50/40"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="font-semibold text-ink">{payment.invoiceId}</div>
-                    <div className="mt-1 text-sm text-slate-600">
-                      {payment.patient} | {payment.amount} | {payment.date}
-                    </div>
-                  </div>
+                href={`/invoices/${payment.invoiceId}`}
+                title={payment.invoiceId}
+                subtitle={`${payment.patient} | ${payment.amount} | ${payment.date}`}
+                badge={
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
                     {getPaymentMethodLabel(payment.method)}
                   </span>
-                </div>
-              </Link>
+                }
+                actions={getPaymentResultActions(payment, permissions)}
+              />
             ))}
           </div>
         </section>
@@ -534,21 +679,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
           <div className="grid gap-3">
             {results.treatmentPlans.map((plan) => (
-              <Link
+              <SearchResultCard
                 key={plan.id}
                 href={`/treatment-plans/${plan.id}`}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-4 transition hover:border-brand-200 hover:bg-brand-50/40"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="font-semibold text-ink">{plan.title}</div>
-                    <div className="mt-1 text-sm text-slate-600">
-                      {plan.patientName} | {plan.estimatedTotalCost} | الجلسة التالية: {plan.nextSession}
-                    </div>
-                  </div>
-                  <StatusBadge status={plan.status as BadgeStatus} />
-                </div>
-              </Link>
+                title={plan.title}
+                subtitle={`${plan.patientName} | ${plan.estimatedTotalCost} | الجلسة التالية: ${plan.nextSession}`}
+                badge={<StatusBadge status={plan.status as BadgeStatus} />}
+                actions={getTreatmentPlanResultActions(plan, permissions)}
+              />
             ))}
           </div>
         </section>
