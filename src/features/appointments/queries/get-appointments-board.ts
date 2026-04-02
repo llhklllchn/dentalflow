@@ -23,10 +23,12 @@ type GetAppointmentsBoardOptions = {
 export type AppointmentsBoardItem = {
   id: string;
   patientId: string;
+  dentistId?: string;
   patient: string;
   dentist: string;
   service: string;
   time: string;
+  appointmentDate?: string;
   status: AppointmentStatus;
 };
 
@@ -157,6 +159,7 @@ export async function getAppointmentsBoard(
       return appointments.map((appointment) => ({
         id: appointment.id,
         patientId: appointment.patientId,
+        dentistId: appointment.dentistId,
         patient: formatFullName(appointment.patient.firstName, appointment.patient.lastName),
         dentist: formatFullName(
           appointment.dentist.user.firstName,
@@ -164,6 +167,7 @@ export async function getAppointmentsBoard(
         ),
         service: appointment.service.name,
         time: formatTimeRange(appointment.startsAt, appointment.endsAt),
+        appointmentDate: appointment.startsAt.toISOString().slice(0, 10),
         status: fromDatabaseEnum<AppointmentStatus>(appointment.status)
       }));
     }

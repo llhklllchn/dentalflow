@@ -80,10 +80,12 @@ export type PatientDetails = PatientListItem & {
 export type AppointmentBoardItem = {
   id: string;
   patientId: string;
+  dentistId?: string;
   patient: string;
   dentist: string;
   service: string;
   time: string;
+  appointmentDate?: string;
   status: AppointmentStatus;
 };
 
@@ -458,28 +460,34 @@ export const appointmentsBoard: AppointmentBoardItem[] = [
   {
     id: "apt_001",
     patientId: "pat_001",
+    dentistId: "den_001",
     patient: "سارة علي",
     dentist: "د. ليث",
     service: "تنظيف",
     time: "09:30 - 10:00",
+    appointmentDate: "2026-04-02",
     status: "confirmed"
   },
   {
     id: "apt_002",
     patientId: "pat_002",
+    dentistId: "den_002",
     patient: "محمد خليل",
     dentist: "د. هناء",
     service: "علاج عصب",
     time: "10:00 - 11:00",
+    appointmentDate: "2026-04-02",
     status: "checked_in"
   },
   {
     id: "apt_003",
     patientId: "pat_003",
+    dentistId: "den_001",
     patient: "لجين أحمد",
     dentist: "د. ليث",
     service: "فحص",
     time: "11:30 - 12:00",
+    appointmentDate: "2026-04-02",
     status: "scheduled"
   }
 ];

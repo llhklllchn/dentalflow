@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
@@ -15,7 +16,7 @@ import { requirePermission } from "@/lib/auth/guards";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getInvoiceStatusOptions } from "@/lib/domain/labels";
 import { normalizeInvoiceView } from "@/lib/filters/list-presets";
-import { buildQueryPath } from "@/lib/navigation/create-flow";
+import { buildPaymentCreatePath, buildQueryPath } from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { extractFormattedAmount, formatMetricNumber } from "@/lib/utils/formatted-value";
 import { InvoiceStatus } from "@/types/domain";
@@ -38,6 +39,8 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
   ) as Partial<Record<InvoiceStatus, string>>;
   const user = await requirePermission("invoices:view");
   const canManageInvoices = hasPermission(user.role, "invoices:*");
+  const canRecordPayments = hasPermission(user.role, "payments:*");
+  const canViewPatients = hasPermission(user.role, "patients:view");
   const workflowGuide = getWorkflowGuide("invoices", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
@@ -103,6 +106,33 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
       active: view === "settled"
     }
   ];
+
+  function getInvoiceActionItems(invoice: (typeof invoices)[number]) {
+    return [
+      canRecordPayments &&
+      invoice.status !== "cancelled" &&
+      extractFormattedAmount(invoice.balance) > 0
+        ? {
+            href: buildPaymentCreatePath({
+              invoiceId: invoice.id,
+              patientId: invoice.patientId
+            }),
+            label: "تسجيل دفعة",
+            tone: "brand" as const
+          }
+        : null,
+      canViewPatients
+        ? {
+            href: `/patients/${invoice.patientId}`,
+            label: "ملف المريض"
+          }
+        : null
+    ].filter(Boolean) as Array<{
+      href: string;
+      label: string;
+      tone?: "default" | "brand" | "emerald";
+    }>;
+  }
 
   async function submitStatusForm(formData: FormData) {
     "use server";
@@ -306,6 +336,8 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                       </form>
                     ) : null}
                   </div>
+
+                  <ActionLinkStrip items={getInvoiceActionItems(invoice)} />
                 </div>
               ))}
             </div>
@@ -368,6 +400,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                             </form>
                           ) : null}
                         </div>
+                        <ActionLinkStrip items={getInvoiceActionItems(invoice)} />
                       </td>
                     </tr>
                   ))}

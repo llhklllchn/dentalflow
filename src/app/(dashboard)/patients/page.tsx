@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
@@ -15,7 +16,13 @@ import { requirePermission } from "@/lib/auth/guards";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { normalizePatientSegment } from "@/lib/filters/list-presets";
-import { buildQueryPath } from "@/lib/navigation/create-flow";
+import {
+  buildAppointmentCreatePath,
+  buildDentalRecordCreatePath,
+  buildInvoiceCreatePath,
+  buildQueryPath,
+  buildTreatmentPlanCreatePath
+} from "@/lib/navigation/create-flow";
 import {
   extractFormattedAmount,
   formatMetricNumber,
@@ -47,6 +54,10 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
   const resolvedSearchParams = await searchParams;
   const user = await requirePermission("patients:view");
   const canManagePatients = hasPermission(user.role, "patients:*");
+  const canCreateAppointments = hasPermission(user.role, "appointments:*");
+  const canCreateInvoices = hasPermission(user.role, "invoices:*");
+  const canCreateRecords = hasPermission(user.role, "dental-records:*");
+  const canCreatePlans = hasPermission(user.role, "treatment-plans:*");
   const workflowGuide = getWorkflowGuide("patients", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
@@ -107,6 +118,41 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
       active: segment === "no_visit"
     }
   ];
+
+  function getPatientActionItems(patientId: string) {
+    return [
+      canCreateAppointments
+        ? {
+            href: buildAppointmentCreatePath({ patientId }),
+            label: "موعد جديد",
+            tone: "brand" as const
+          }
+        : null,
+      canCreateInvoices
+        ? {
+            href: buildInvoiceCreatePath({ patientId }),
+            label: "فاتورة جديدة"
+          }
+        : null,
+      canCreateRecords
+        ? {
+            href: buildDentalRecordCreatePath({ patientId }),
+            label: "سجل طبي"
+          }
+        : null,
+      canCreatePlans
+        ? {
+            href: buildTreatmentPlanCreatePath({ patientId }),
+            label: "خطة علاج",
+            tone: "emerald" as const
+          }
+        : null
+    ].filter(Boolean) as Array<{
+      href: string;
+      label: string;
+      tone?: "default" | "brand" | "emerald";
+    }>;
+  }
 
   async function archivePatientFromList(formData: FormData) {
     "use server";
@@ -283,6 +329,8 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                         </form>
                       ) : null}
                     </div>
+
+                    <ActionLinkStrip items={getPatientActionItems(patient.id)} />
                   </div>
                 );
               })}
@@ -342,6 +390,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                               </form>
                             ) : null}
                           </div>
+                          <ActionLinkStrip items={getPatientActionItems(patient.id)} />
                         </td>
                       </tr>
                     );

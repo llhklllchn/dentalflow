@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ActionLinkStrip } from "@/components/shared/action-link-strip";
 import { CollectionEmptyState } from "@/components/shared/collection-empty-state";
 import { ExportCsvButton } from "@/components/shared/export-csv-button";
 import { PageHeader } from "@/components/shared/page-header";
@@ -18,7 +19,12 @@ import { requirePermission } from "@/lib/auth/guards";
 import { getWorkflowGuide } from "@/lib/constants/workflow-guides";
 import { getAppointmentStatusOptions } from "@/lib/domain/labels";
 import { normalizeAppointmentView } from "@/lib/filters/list-presets";
-import { buildQueryPath } from "@/lib/navigation/create-flow";
+import {
+  buildDentalRecordCreatePath,
+  buildInvoiceCreatePath,
+  buildQueryPath,
+  buildTreatmentPlanCreatePath
+} from "@/lib/navigation/create-flow";
 import { hasPermission } from "@/lib/permissions/permissions";
 import { formatMetricNumber } from "@/lib/utils/formatted-value";
 import { AppointmentStatus } from "@/types/domain";
@@ -94,6 +100,9 @@ export default async function AppointmentsPage({
   const canManageAppointments = hasPermission(user.role, "appointments:*");
   const canUpdateStatuses =
     canManageAppointments || hasPermission(user.role, "appointments:update-status");
+  const canCreateInvoices = hasPermission(user.role, "invoices:*");
+  const canCreateRecords = hasPermission(user.role, "dental-records:*");
+  const canCreatePlans = hasPermission(user.role, "treatment-plans:*");
   const workflowGuide = getWorkflowGuide("appointments", user.role);
 
   const search = resolvedSearchParams?.search?.trim();
@@ -164,6 +173,46 @@ export default async function AppointmentsPage({
       active: view === "completed"
     }
   ];
+
+  function getAppointmentActionItems(appointment: AppointmentsBoardItem) {
+    return [
+      canCreateRecords
+        ? {
+            href: buildDentalRecordCreatePath({
+              patientId: appointment.patientId,
+              dentistId: appointment.dentistId,
+              appointmentDate: appointment.appointmentDate
+            }),
+            label: "سجل طبي",
+            tone: "brand" as const
+          }
+        : null,
+      canCreateInvoices
+        ? {
+            href: buildInvoiceCreatePath({
+              patientId: appointment.patientId,
+              serviceName: appointment.service
+            }),
+            label: "فاتورة"
+          }
+        : null,
+      canCreatePlans
+        ? {
+            href: buildTreatmentPlanCreatePath({
+              patientId: appointment.patientId,
+              dentistId: appointment.dentistId,
+              serviceName: appointment.service
+            }),
+            label: "خطة علاج",
+            tone: "emerald" as const
+          }
+        : null
+    ].filter(Boolean) as Array<{
+      href: string;
+      label: string;
+      tone?: "default" | "brand" | "emerald";
+    }>;
+  }
 
   async function submitStatusChange(formData: FormData) {
     "use server";
@@ -387,6 +436,8 @@ export default async function AppointmentsPage({
                         ))
                       : null}
                   </div>
+
+                  <ActionLinkStrip items={getAppointmentActionItems(appointment)} />
                 </div>
               );
             })}
