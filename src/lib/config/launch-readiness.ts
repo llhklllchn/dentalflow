@@ -8,6 +8,26 @@ type ReadinessCheck = {
   critical?: boolean;
 };
 
+function looksLikePlaceholder(value: string | undefined) {
+  if (!value?.trim()) {
+    return false;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  const placeholderFragments = [
+    "example.com",
+    "replace-with",
+    "changeme",
+    "change-me",
+    "smtp-user",
+    "smtp-password",
+    "postgresql://user:password@host",
+    "user:password@host"
+  ];
+
+  return placeholderFragments.some((fragment) => normalized.includes(fragment));
+}
+
 function isSecurePublicUrl(value: string | undefined) {
   if (!value?.trim()) {
     return false;
@@ -33,14 +53,28 @@ export function getLaunchReadinessSummary() {
   const databaseUrl = process.env.DATABASE_URL?.trim();
   const smtpReady = Boolean(
     process.env.SMTP_HOST?.trim() &&
+      !looksLikePlaceholder(process.env.SMTP_HOST) &&
       process.env.SMTP_PORT?.trim() &&
       process.env.SMTP_USER?.trim() &&
+      !looksLikePlaceholder(process.env.SMTP_USER) &&
       process.env.SMTP_PASS?.trim() &&
+      !looksLikePlaceholder(process.env.SMTP_PASS) &&
       process.env.SMTP_FROM_EMAIL?.trim()
+      && !looksLikePlaceholder(process.env.SMTP_FROM_EMAIL)
   );
-  const jobsReady = Boolean(process.env.DENTFLOW_JOBS_SECRET?.trim());
-  const appUrlReady = isSecurePublicUrl(appUrl);
-  const databaseReady = Boolean(databaseUrl) && !usesDemoData;
+  const jobsReady = Boolean(
+    process.env.DENTFLOW_JOBS_SECRET?.trim() &&
+      !looksLikePlaceholder(process.env.DENTFLOW_JOBS_SECRET)
+  );
+  const appUrlReady = isSecurePublicUrl(appUrl) && !looksLikePlaceholder(appUrl);
+  const databaseReady =
+    Boolean(databaseUrl) && !usesDemoData && !looksLikePlaceholder(databaseUrl);
+  const webhookReady = Boolean(
+    process.env.NOTIFICATION_WEBHOOK_URL?.trim() &&
+      process.env.NOTIFICATION_WEBHOOK_SECRET?.trim() &&
+      !looksLikePlaceholder(process.env.NOTIFICATION_WEBHOOK_URL) &&
+      !looksLikePlaceholder(process.env.NOTIFICATION_WEBHOOK_SECRET)
+  );
 
   const checks: ReadinessCheck[] = [
     {
@@ -58,7 +92,7 @@ export function getLaunchReadinessSummary() {
       ready: databaseReady,
       detail: databaseReady
         ? "تم ربط التطبيق بقاعدة بيانات صالحة للاستخدام الحقيقي."
-        : "ما زال التطبيق يحتاج قاعدة بيانات إنتاجية مع DENTFLOW_DEMO_MODE=false.",
+        : "ما زال التطبيق يحتاج قاعدة بيانات إنتاجية حقيقية مع DENTFLOW_DEMO_MODE=false.",
       critical: true
     },
     {
@@ -67,7 +101,7 @@ export function getLaunchReadinessSummary() {
       ready: appUrlReady,
       detail: appUrlReady
         ? `NEXTAUTH_URL مضبوط على رابط عام آمن: ${appUrl}`
-        : "NEXTAUTH_URL ما زال غير عام أو ليس HTTPS.",
+        : "NEXTAUTH_URL ما زال غير عام أو ليس HTTPS أو ما زال يحمل قيمة وهمية.",
       critical: true
     },
     {
@@ -76,7 +110,7 @@ export function getLaunchReadinessSummary() {
       ready: smtpReady,
       detail: smtpReady
         ? "إعدادات SMTP الأساسية مكتملة لإرسال الدعوات والاستعادة."
-        : "إعدادات SMTP الأساسية ما تزال ناقصة.",
+        : "إعدادات SMTP الأساسية ما تزال ناقصة أو تحمل قيمًا تجريبية.",
       critical: true
     },
     {
@@ -85,21 +119,16 @@ export function getLaunchReadinessSummary() {
       ready: jobsReady,
       detail: jobsReady
         ? "سر وظائف الخلفية موجود ويمكن جدولة التذكيرات والتسليم."
-        : "سر وظائف الخلفية غير موجود بعد.",
+        : "سر وظائف الخلفية غير موجود بعد أو ما زال قيمة افتراضية.",
       critical: true
     },
     {
       key: "webhook",
       label: "قنوات الرسائل الإضافية",
-      ready: Boolean(
-        process.env.NOTIFICATION_WEBHOOK_URL?.trim() &&
-          process.env.NOTIFICATION_WEBHOOK_SECRET?.trim()
-      ),
-      detail:
-        process.env.NOTIFICATION_WEBHOOK_URL?.trim() &&
-        process.env.NOTIFICATION_WEBHOOK_SECRET?.trim()
-          ? "قناة webhook مفعلة لربط WhatsApp أو SMS عند الحاجة."
-          : "هذا الاختيار إضافي فقط إذا كنت تريد WhatsApp أو SMS فعليًا."
+      ready: webhookReady,
+      detail: webhookReady
+        ? "قناة webhook مفعلة لربط WhatsApp أو SMS عند الحاجة."
+        : "هذا الاختيار إضافي فقط إذا كنت تريد WhatsApp أو SMS فعليًا."
     }
   ];
 
