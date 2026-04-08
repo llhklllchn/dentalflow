@@ -12,7 +12,7 @@ import { getScopedSessionUser } from "@/lib/tenant/scope";
 const updateDentistProfileSchema = dentistProfileFieldsSchema
   .omit({ userId: true })
   .extend({
-    dentistId: z.string().min(1, "Dentist id is required.")
+    dentistId: z.string().min(1, "معرف الطبيب مطلوب.")
   })
   .refine((data) => data.endTime > data.startTime, {
     message: "وقت النهاية يجب أن يكون بعد وقت البداية.",

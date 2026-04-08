@@ -219,7 +219,7 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
           <div id="delivery-log" className="panel p-6">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div><div className="text-xl font-semibold text-ink">سجل الإرسال</div><p className="mt-2 text-sm leading-7 text-slate-600">راقب أحدث السجلات بحسب الحالة أو القناة.</p></div>
-              <div className="flex flex-wrap items-center gap-3"><StatusBadge label={`${formatMetricNumber(sentLogs)} تم تسليمها`} status="sent" /><ExportCsvButton filename="notification-log-filtered" rows={logRows} label="CSV" className="px-4 py-2" /></div>
+              <div className="flex flex-wrap items-center gap-3"><StatusBadge label={`${formatMetricNumber(sentLogs)} تم تسليمها`} status="sent" /><ExportCsvButton filename="notification-log-filtered" rows={logRows} label="تصدير CSV" className="px-4 py-2" /></div>
             </div>
 
             <form method="get" className="mb-5 grid gap-3 md:grid-cols-[1fr,180px,180px,140px,120px]">
@@ -266,7 +266,7 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
               <input name="name" defaultValue={selectedTemplate?.name ?? "تذكير موعد"} placeholder="اسم القالب" className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3" />
               <div className="grid gap-4 md:grid-cols-2">
                 <select name="channel" defaultValue={selectedTemplate?.channel ?? "whatsapp"} className="rounded-2xl border border-slate-300 bg-white px-4 py-3"><option value="whatsapp">{getNotificationChannelLabel("whatsapp")}</option><option value="sms">{getNotificationChannelLabel("sms")}</option><option value="email">{getNotificationChannelLabel("email")}</option></select>
-                <input name="templateKey" defaultValue={selectedTemplate?.templateKey ?? "appointment_reminder_24h"} placeholder="template key" className="rounded-2xl border border-slate-300 bg-white px-4 py-3" />
+                <input name="templateKey" defaultValue={selectedTemplate?.templateKey ?? "appointment_reminder_24h"} placeholder="مفتاح القالب" className="rounded-2xl border border-slate-300 bg-white px-4 py-3" />
               </div>
               <input name="subject" defaultValue={selectedTemplate?.subject ?? ""} placeholder="الموضوع للبريد فقط" className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3" />
               <textarea name="body" defaultValue={selectedTemplate?.body ?? "مرحبًا {patient_name}، لديك موعد قريب في العيادة."} className="min-h-32 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3" />

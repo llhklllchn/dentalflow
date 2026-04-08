@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const staffInvitationFormSchema = z.object({
-  email: z.string().email("Valid email is required."),
+  email: z.string().email("يرجى إدخال بريد إلكتروني صالح."),
   role: z.enum([
     "owner",
     "admin",

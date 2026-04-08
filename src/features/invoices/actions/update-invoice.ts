@@ -13,7 +13,7 @@ import { getScopedSessionUser } from "@/lib/tenant/scope";
 import { InvoiceStatus } from "@/types/domain";
 
 const updateInvoiceSchema = invoiceFormSchema.extend({
-  invoiceId: z.string().min(1, "Invoice id is required.")
+  invoiceId: z.string().min(1, "معرف الفاتورة مطلوب.")
 });
 
 export async function updateInvoice(input: unknown) {

@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const treatmentPlanFormSchema = z.object({
-  patientId: z.string().min(1, "Patient is required."),
-  dentistId: z.string().min(1, "Dentist is required."),
-  title: z.string().min(2, "Plan title is required."),
+  patientId: z.string().min(1, "المريض مطلوب."),
+  dentistId: z.string().min(1, "الطبيب مطلوب."),
+  title: z.string().min(2, "عنوان الخطة مطلوب."),
   status: z.enum([
     "draft",
     "planned",
@@ -12,7 +12,7 @@ export const treatmentPlanFormSchema = z.object({
     "completed",
     "cancelled"
   ]),
-  serviceName: z.string().min(2, "Service is required."),
+  serviceName: z.string().min(2, "الخدمة مطلوبة."),
   toothNumber: z.string().optional(),
   description: z.string().optional(),
   estimatedCost: z.number().min(0),

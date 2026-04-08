@@ -9,7 +9,7 @@ import { hasPermission } from "@/lib/permissions/permissions";
 import { getScopedSessionUser } from "@/lib/tenant/scope";
 
 const setTemplateStateSchema = z.object({
-  templateId: z.string().min(1, "Template id is required."),
+  templateId: z.string().min(1, "معرف القالب مطلوب."),
   isActive: z.boolean()
 });
 

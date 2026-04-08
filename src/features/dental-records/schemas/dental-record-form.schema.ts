@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const dentalRecordFormSchema = z.object({
-  patientId: z.string().min(1, "Patient is required."),
-  dentistId: z.string().min(1, "Dentist is required."),
-  appointmentDate: z.string().min(1, "Appointment date is required."),
+  patientId: z.string().min(1, "المريض مطلوب."),
+  dentistId: z.string().min(1, "الطبيب مطلوب."),
+  appointmentDate: z.string().min(1, "تاريخ الموعد مطلوب."),
   toothNumbers: z.string().optional(),
   chiefComplaint: z.string().optional(),
   examinationNotes: z.string().optional(),

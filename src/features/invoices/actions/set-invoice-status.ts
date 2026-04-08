@@ -11,7 +11,7 @@ import { getScopedSessionUser } from "@/lib/tenant/scope";
 import { InvoiceStatus } from "@/types/domain";
 
 const setInvoiceStatusSchema = z.object({
-  invoiceId: z.string().min(1, "Invoice id is required."),
+  invoiceId: z.string().min(1, "معرف الفاتورة مطلوب."),
   nextStatus: z.enum(["cancelled"])
 });
 

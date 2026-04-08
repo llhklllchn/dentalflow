@@ -9,7 +9,7 @@ import { hasPermission } from "@/lib/permissions/permissions";
 import { getScopedSessionUser } from "@/lib/tenant/scope";
 
 const setStaffUserStatusSchema = z.object({
-  userId: z.string().min(1, "User id is required."),
+  userId: z.string().min(1, "معرف المستخدم مطلوب."),
   nextStatus: z.enum(["ACTIVE", "INACTIVE"])
 });
 

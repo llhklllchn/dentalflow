@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const invoiceItemSchema = z.object({
-  serviceName: z.string().min(2, "Service name is required."),
+  serviceName: z.string().min(2, "اسم الخدمة مطلوب."),
   description: z.string().optional(),
   quantity: z.number().int().min(1),
   unitPrice: z.number().min(0),
@@ -9,13 +9,13 @@ const invoiceItemSchema = z.object({
 });
 
 export const invoiceFormSchema = z.object({
-  patientId: z.string().min(1, "Patient is required."),
-  issueDate: z.string().min(1, "Issue date is required."),
+  patientId: z.string().min(1, "المريض مطلوب."),
+  issueDate: z.string().min(1, "تاريخ الإصدار مطلوب."),
   dueDate: z.string().optional(),
   discount: z.number().min(0),
   tax: z.number().min(0),
   notes: z.string().optional(),
-  items: z.array(invoiceItemSchema).min(1, "At least one invoice item is required.")
+  items: z.array(invoiceItemSchema).min(1, "يجب إضافة بند واحد على الأقل إلى الفاتورة.")
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;

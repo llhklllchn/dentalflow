@@ -17,7 +17,7 @@ import { getScopedSessionUser } from "@/lib/tenant/scope";
 import { Role } from "@/types/domain";
 
 const refreshStaffInvitationSchema = z.object({
-  invitationId: z.string().min(1, "Invitation id is required.")
+  invitationId: z.string().min(1, "معرف الدعوة مطلوب.")
 });
 
 export async function refreshStaffInvitation(input: unknown) {

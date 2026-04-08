@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const appointmentFormSchema = z.object({
-  patientId: z.string().min(1, "Patient is required."),
-  dentistId: z.string().min(1, "Dentist is required."),
-  serviceId: z.string().min(1, "Service is required."),
-  startsAt: z.string().min(1, "Start time is required."),
-  endsAt: z.string().min(1, "End time is required."),
+  patientId: z.string().min(1, "المريض مطلوب."),
+  dentistId: z.string().min(1, "الطبيب مطلوب."),
+  serviceId: z.string().min(1, "الخدمة مطلوبة."),
+  startsAt: z.string().min(1, "وقت البداية مطلوب."),
+  endsAt: z.string().min(1, "وقت النهاية مطلوب."),
   status: z.enum([
     "scheduled",
     "confirmed",
@@ -19,4 +19,3 @@ export const appointmentFormSchema = z.object({
 });
 
 export type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
-

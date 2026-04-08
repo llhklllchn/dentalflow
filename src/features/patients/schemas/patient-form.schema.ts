@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const patientFormSchema = z.object({
-  firstName: z.string().min(2, "First name is required."),
-  lastName: z.string().min(2, "Last name is required."),
+  firstName: z.string().min(2, "الاسم الأول مطلوب."),
+  lastName: z.string().min(2, "اسم العائلة مطلوب."),
   gender: z.enum(["male", "female"]).optional(),
   dateOfBirth: z.string().optional(),
-  phone: z.string().min(6, "Phone number is required."),
+  phone: z.string().min(6, "رقم الهاتف مطلوب."),
   whatsappPhone: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   nationalId: z.string().optional(),
@@ -15,4 +15,3 @@ export const patientFormSchema = z.object({
 });
 
 export type PatientFormValues = z.infer<typeof patientFormSchema>;
-

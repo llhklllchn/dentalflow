@@ -10,7 +10,7 @@ import { hasPermission } from "@/lib/permissions/permissions";
 import { getScopedSessionUser } from "@/lib/tenant/scope";
 
 const updateServiceSchema = serviceFormSchema.extend({
-  serviceId: z.string().min(1, "Service id is required.")
+  serviceId: z.string().min(1, "معرف الخدمة مطلوب.")
 });
 
 export async function updateService(input: unknown) {

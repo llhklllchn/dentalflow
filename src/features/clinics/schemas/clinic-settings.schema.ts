@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 export const clinicSettingsSchema = z.object({
-  name: z.string().min(2, "Clinic name is required."),
+  name: z.string().min(2, "اسم العيادة مطلوب."),
   phone: z.string().trim().optional(),
   email: z
     .string()
     .trim()
     .optional()
     .refine((value) => !value || z.string().email().safeParse(value).success, {
-      message: "A valid email address is required."
+      message: "يرجى إدخال بريد إلكتروني صالح."
     }),
   city: z.string().trim().optional(),
   address: z.string().trim().optional(),

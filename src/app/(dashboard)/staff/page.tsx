@@ -484,7 +484,7 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
             <ExportCsvButton
               filename="staff-list-visible"
               rows={filteredStaffExportRows}
-              label="CSV"
+              label="تصدير CSV"
               className="px-4 py-2"
             />
           </div>

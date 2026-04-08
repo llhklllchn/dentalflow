@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const medicalHistoryFormSchema = z.object({
-  patientId: z.string().min(1, "Patient is required."),
+  patientId: z.string().min(1, "المريض مطلوب."),
   allergies: z.string().optional(),
   chronicConditions: z.string().optional(),
   currentMedications: z.string().optional(),

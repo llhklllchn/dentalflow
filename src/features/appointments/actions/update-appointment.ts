@@ -17,7 +17,7 @@ import { getScopedSessionUser } from "@/lib/tenant/scope";
 import { AppointmentStatus } from "@/types/domain";
 
 const updateAppointmentSchema = appointmentFormSchema.extend({
-  appointmentId: z.string().min(1, "Appointment id is required.")
+  appointmentId: z.string().min(1, "معرف الموعد مطلوب.")
 });
 
 export async function updateAppointment(input: unknown) {
