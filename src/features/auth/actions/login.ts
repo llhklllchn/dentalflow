@@ -29,7 +29,7 @@ export async function loginAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirectToLoginWithError(parsed.error.issues[0]?.message ?? "Unable to sign in.", nextPath);
+    redirectToLoginWithError(parsed.error.issues[0]?.message ?? "تعذر تسجيل الدخول.", nextPath);
   }
 
   if (shouldUseDemoData()) {

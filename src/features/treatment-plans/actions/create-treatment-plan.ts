@@ -126,7 +126,7 @@ export async function createTreatmentPlan(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to create treatment plan."
+        message: error instanceof Error ? error.message : "تعذر إنشاء خطة العلاج."
     };
   }
 }

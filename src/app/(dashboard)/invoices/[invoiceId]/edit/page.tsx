@@ -75,7 +75,7 @@ export default async function EditInvoicePage({
   return (
     <div>
       <PageHeader
-        eyebrow="Edit Invoice"
+        eyebrow="تعديل الفاتورة"
         title={`تعديل الفاتورة ${invoiceId}`}
         description="يمكنك تعديل بيانات الفاتورة وإعادة حساب الإجمالي مع الحفاظ على الاتساق المالي للدفعات المسجلة."
       />

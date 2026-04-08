@@ -33,7 +33,7 @@ export default function FeaturesPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <PageHeader
-        eyebrow="Features"
+        eyebrow="المزايا"
         title="المزايا الرئيسية"
         description="بنية المنتج الآن أوضح وأقرب لمنتج SaaS متخصص، مع تقسيم عملي لما يحتاجه فريق العيادة يوميًا."
       />

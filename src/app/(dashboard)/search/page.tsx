@@ -387,7 +387,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div>
       <PageHeader
-        eyebrow="Global Search"
+        eyebrow="البحث العام"
         title="البحث العام"
         description="مركز بحث واسع يصل الآن إلى المرضى والمواعيد والفواتير والمدفوعات والخطط العلاجية من واجهة واحدة أسرع وأوضح."
         tips={[

@@ -137,7 +137,7 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
   return (
     <div>
       <PageHeader
-        eyebrow="Notifications"
+        eyebrow="الإشعارات"
         title="الإشعارات والتذكير"
         description="مركز تشغيل أوضح للقوالب وطابور التذكير وسجل الإرسال."
         tips={["راقب صحة التسليم", "أغلق الفشل بسرعة", "حافظ على قالب نشط"]}

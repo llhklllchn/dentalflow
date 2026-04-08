@@ -296,7 +296,7 @@ export default async function AppointmentsPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Appointments"
+        eyebrow="المواعيد"
         title="المواعيد"
         description="واجهة تشغيل يومية أكثر احترافية لجدولة المواعيد ومتابعة الحالات وطباعة القائمة أو تصديرها ومراجعة الجلسات الجاهزة من نفس الشاشة."
         tips={["فلترة حسب الحالة", "تصدير سريع", "إجراءات مباشرة من البطاقة"]}

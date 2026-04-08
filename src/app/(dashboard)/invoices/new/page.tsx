@@ -117,7 +117,7 @@ export default async function NewInvoicePage({ searchParams }: NewInvoicePagePro
   return (
     <div>
       <PageHeader
-        eyebrow="Create Invoice"
+        eyebrow="إنشاء فاتورة"
         title="إنشاء فاتورة جديدة"
         description="أنشئ فاتورة واضحة وقابلة للتحصيل بسرعة، مع ربط مباشر بالمريض والخدمة وتوثيق التفاصيل التي تحتاجها المحاسبة والاستقبال من أول إصدار."
         tips={[

@@ -80,7 +80,7 @@ export async function createService(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to create service."
+        message: error instanceof Error ? error.message : "تعذر إنشاء الخدمة."
     };
   }
 }

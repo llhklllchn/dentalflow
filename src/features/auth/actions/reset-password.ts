@@ -22,7 +22,7 @@ export async function resetPasswordAction(formData: FormData) {
   if (!parsed.success) {
     redirectToResetError(
       String(formData.get("token") ?? ""),
-      parsed.error.issues[0]?.message ?? "Unable to reset password."
+      parsed.error.issues[0]?.message ?? "تعذر إعادة تعيين كلمة المرور."
     );
   }
 

@@ -15,7 +15,7 @@ export default function RootErrorPage({ error, reset }: RootErrorPageProps) {
       <div className="grid w-full gap-6 xl:grid-cols-[1.05fr,0.95fr]">
         <section className="panel p-8">
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-700">
-            System Error
+            خطأ في النظام
           </div>
           <h1 className="mt-3 text-4xl font-bold text-ink">حدث خطأ غير متوقع</h1>
           <p className="mt-4 text-sm leading-8 text-slate-600">

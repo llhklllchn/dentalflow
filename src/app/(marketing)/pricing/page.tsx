@@ -15,7 +15,7 @@ export default function PricingPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
       <PageHeader
-        eyebrow="Pricing"
+        eyebrow="الباقات"
         title="باقات الإطلاق"
         description="تسعير واضح ومناسب للإطلاق في الأردن، مبني على فكرة السعر لكل عيادة لا لكل مستخدم، حتى يبقى القرار أسهل على المالك والمدير."
         tips={["سعر شهري واضح", "تموضع مناسب للأردن", "Plus هي التوصية الأقوى للإطلاق"]}

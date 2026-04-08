@@ -108,7 +108,7 @@ export async function updateService(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to update service."
+        message: error instanceof Error ? error.message : "تعذر تحديث الخدمة."
     };
   }
 }

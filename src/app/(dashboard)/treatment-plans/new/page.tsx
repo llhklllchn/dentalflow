@@ -117,7 +117,7 @@ export default async function NewTreatmentPlanPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Create Treatment Plan"
+        eyebrow="إنشاء خطة علاج"
         title="إنشاء خطة علاج جديدة"
         description="ابنِ خطة علاج مفهومة للفريق والمريض معًا، تربط الطبيب والخدمة والتكلفة والجلسة الأولى ضمن مسار واضح يسهّل المتابعة والتحويل لاحقًا إلى مواعيد وفواتير."
         tips={[

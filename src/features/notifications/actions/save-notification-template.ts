@@ -78,7 +78,7 @@ export async function saveNotificationTemplate(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to save template."
+        message: error instanceof Error ? error.message : "تعذر حفظ القالب."
     };
   }
 }

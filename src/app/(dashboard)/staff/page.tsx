@@ -263,7 +263,7 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
   return (
     <div>
       <PageHeader
-        eyebrow="Staff"
+        eyebrow="الفريق"
         title="الموظفون"
         description="مركز إدارة الفريق والدعوات والأدوار مع قراءة أوضح للجاهزية والتفعيل وتوزيع المسؤوليات داخل العيادة."
         tips={[

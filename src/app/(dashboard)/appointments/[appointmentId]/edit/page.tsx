@@ -34,7 +34,7 @@ export default async function EditAppointmentPage({
   ]);
 
   if (!appointment) {
-    redirect("/appointments?error=Appointment%20not%20found");
+    redirect("/appointments?error=%D8%A7%D9%84%D9%85%D9%88%D8%B9%D8%AF%20%D8%BA%D9%8A%D8%B1%20%D9%85%D9%88%D8%AC%D9%88%D8%AF");
   }
 
   const currentAppointment = appointment;
@@ -73,7 +73,7 @@ export default async function EditAppointmentPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Edit Appointment"
+        eyebrow="تعديل الموعد"
         title="تعديل الموعد"
         description="إعادة جدولة الموعد أو تعديل الطبيب أو الخدمة أو الملاحظات بدون فقدان حالة الموعد الحالية."
       />

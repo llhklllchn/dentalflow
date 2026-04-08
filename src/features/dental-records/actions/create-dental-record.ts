@@ -158,7 +158,7 @@ export async function createDentalRecord(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to create dental record."
+        message: error instanceof Error ? error.message : "تعذر إنشاء السجل الطبي."
     };
   }
 }

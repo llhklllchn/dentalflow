@@ -122,7 +122,7 @@ export async function updateClinicSettings(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to update clinic settings."
+        message: error instanceof Error ? error.message : "تعذر تحديث إعدادات العيادة."
     };
   }
 }

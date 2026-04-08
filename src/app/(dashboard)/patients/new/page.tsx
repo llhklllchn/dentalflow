@@ -136,7 +136,7 @@ export default async function NewPatientPage({ searchParams }: NewPatientPagePro
   return (
     <div>
       <PageHeader
-        eyebrow="Create Patient"
+        eyebrow="إنشاء مريض"
         title="إضافة مريض جديد"
         description="افتح ملف المريض بسرعة وبشكل احترافي من أول زيارة، مع مساحة تكفي لبيانات التواصل والملاحظات الطبية الأساسية دون أن تثقل على الاستقبال أو الطبيب."
         tips={[

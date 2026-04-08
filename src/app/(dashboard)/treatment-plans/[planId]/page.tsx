@@ -93,7 +93,7 @@ export default async function TreatmentPlanDetailsPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Treatment Plan Details"
+        eyebrow="تفاصيل الخطة العلاجية"
         title={plan.title}
         description={`خطة علاج للمريض ${plan.patientName} مع الطبيب ${plan.dentistName}.`}
         actions={

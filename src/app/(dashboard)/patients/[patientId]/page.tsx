@@ -248,7 +248,7 @@ export default async function PatientDetailsPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Patient Journey"
+        eyebrow="رحلة المريض"
         title={`ملف المريض ${patient.fullName}`}
         description="مساحة تشغيل متكاملة تجمع الرحلة السريرية والمالية والخطة العلاجية والطباعة والتتبع اليومي من صفحة واحدة أوضح للفريق."
         tips={[

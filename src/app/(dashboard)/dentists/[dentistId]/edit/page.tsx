@@ -51,7 +51,7 @@ export default async function EditDentistPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Edit Dentist"
+        eyebrow="تعديل الطبيب"
         title="تعديل ملف الطبيب"
         description="تحديث التخصص واللون وساعات العمل والمدة الافتراضية للجلسة من شاشة واحدة."
       />

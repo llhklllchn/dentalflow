@@ -137,7 +137,7 @@ export async function recordPayment(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to record payment."
+        message: error instanceof Error ? error.message : "تعذر تسجيل الدفعة."
     };
   }
 }

@@ -26,7 +26,7 @@ export async function acceptInvitationAction(formData: FormData) {
   if (!parsed.success) {
     redirectToInvitationError(
       String(formData.get("token") ?? ""),
-      parsed.error.issues[0]?.message ?? "Unable to accept invitation."
+      parsed.error.issues[0]?.message ?? "تعذر قبول الدعوة."
     );
   }
 

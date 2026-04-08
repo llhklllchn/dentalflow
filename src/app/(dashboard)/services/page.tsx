@@ -121,7 +121,7 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
   return (
     <div>
       <PageHeader
-        eyebrow="Services"
+        eyebrow="الخدمات"
         title="الخدمات"
         description="كتالوج علاجي أقوى يحدد ما يمكن جدولته وفوترته وربطه بخطط العلاج، مع قراءة أسرع للأسعار والمدد وحالة التفعيل."
         tips={["ثبت الأسعار الأساسية", "راجع الخدمات المعطلة", "وحد مدد الخدمات الشائعة"]}

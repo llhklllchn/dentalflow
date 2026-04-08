@@ -96,7 +96,7 @@ export async function saveMedicalHistory(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to save medical history."
+        message: error instanceof Error ? error.message : "تعذر حفظ التاريخ الطبي."
     };
   }
 }

@@ -129,7 +129,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   return (
     <div>
       <PageHeader
-        eyebrow="Payments"
+        eyebrow="المدفوعات"
         title="المدفوعات"
         description="سجل تحصيل متقدم لمراجعة الدفعات بسرعة، مع طباعة وتصدير منظم وربط مباشر بالفاتورة وملف المريض من نفس الواجهة."
         tips={["فلترة زمنية", "تصدير CSV", "طباعة السجل"]}

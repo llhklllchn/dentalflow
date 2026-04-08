@@ -186,7 +186,7 @@ export async function updateInvoice(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to update invoice."
+        message: error instanceof Error ? error.message : "تعذر تحديث الفاتورة."
     };
   }
 }

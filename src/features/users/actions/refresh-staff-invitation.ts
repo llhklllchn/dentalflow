@@ -130,7 +130,7 @@ export async function refreshStaffInvitation(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to refresh staff invitation."
+        message: error instanceof Error ? error.message : "تعذر تجديد دعوة الموظف."
     };
   }
 }

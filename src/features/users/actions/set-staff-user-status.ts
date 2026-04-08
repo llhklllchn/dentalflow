@@ -103,7 +103,7 @@ export async function setStaffUserStatus(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to update staff user status."
+        message: error instanceof Error ? error.message : "تعذر تحديث حالة المستخدم."
     };
   }
 }

@@ -55,7 +55,7 @@ export default async function DashboardPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Clinic Control"
+        eyebrow="مركز العيادة"
         title="لوحة التحكم"
         description={`مركز قيادة يومي مصمم لـ ${roleLabel} داخل العيادة، يجمع الإشارات السريعة والأولويات والتنقل الذكي في بداية اليوم.`}
         tips={[roleWorkspace.focusLabel, roleWorkspace.topbarFocus, "ابدأ من المسار المقترح"]}

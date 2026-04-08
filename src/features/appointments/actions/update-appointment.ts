@@ -209,7 +209,7 @@ export async function updateAppointment(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to update appointment."
+        message: error instanceof Error ? error.message : "تعذر تحديث الموعد."
     };
   }
 }

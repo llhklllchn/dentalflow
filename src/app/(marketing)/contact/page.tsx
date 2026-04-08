@@ -24,7 +24,7 @@ export default function ContactPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <PageHeader
-        eyebrow="Contact"
+        eyebrow="التواصل"
         title="تواصل معنا"
         description="واجهة بيع أولية أوضح لتنظيم طلبات العروض، اختيار الباقة المناسبة، وترتيب الإطلاق التجاري مع العيادات."
       />

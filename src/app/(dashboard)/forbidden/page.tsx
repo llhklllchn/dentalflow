@@ -23,7 +23,7 @@ export default async function ForbiddenPage({ searchParams }: ForbiddenPageProps
   return (
     <div>
       <PageHeader
-        eyebrow="Access Control"
+        eyebrow="التحكم بالوصول"
         title="الوصول غير متاح لحسابك الحالي"
         description={`حسابك الحالي لا يملك الصلاحية الكافية للوصول إلى ${permissionLabel}. إذا كنت تحتاج هذه المساحة ضمن عملك اليومي، اطلب من مالك العيادة أو مدير النظام مراجعة دورك.`}
         actions={

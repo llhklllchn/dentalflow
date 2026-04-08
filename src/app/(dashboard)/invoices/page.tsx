@@ -206,7 +206,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
   return (
     <div>
       <PageHeader
-        eyebrow="Invoices"
+        eyebrow="الفواتير"
         title="الفواتير"
         description="قراءة مالية أكثر نضجًا للفريق والإدارة، مع تصدير منظم وطباعة مباشرة ومراجعة الحالات والتحصيل من شاشة واحدة واضحة."
         tips={["تصدير CSV", "طباعة القائمة", "متابعة الأرصدة المفتوحة"]}

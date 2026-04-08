@@ -209,7 +209,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
   return (
     <div>
       <PageHeader
-        eyebrow="Patients"
+        eyebrow="المرضى"
         title="المرضى"
         description="واجهة تشغيل أوضح لملفات المرضى، مع بحث سريع وتصدير منظم وطباعة مباشرة والوصول إلى الملف أو التعديل أو الأرشفة من نفس الشاشة."
         tips={["ابحث بالاسم أو الهاتف", "صدّر القائمة للمراجعة", "اطبع الشاشة عند الحاجة"]}

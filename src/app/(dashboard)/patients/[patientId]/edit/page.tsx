@@ -74,7 +74,7 @@ export default async function EditPatientPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Edit Patient"
+        eyebrow="تعديل المريض"
         title="تعديل ملف المريض"
         description="تحديث بيانات المريض الأساسية وملخصه الطبي من نفس نموذج الإضافة."
       />

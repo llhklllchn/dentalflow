@@ -171,7 +171,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   return (
     <div>
       <PageHeader
-        eyebrow="Settings"
+        eyebrow="الإعدادات"
         title="الإعدادات"
         description="مساحة ضبط تشغيلية تجمع تعريف العيادة، ساعات العمل، وتفاصيل الجاهزية اليومية حتى يكون الإطلاق والإدارة أكثر ثباتًا وتنظيمًا."
         tips={["أكمل ملف العيادة", "ثبت ساعات العمل", "راجع التذكيرات قبل الإطلاق"]}

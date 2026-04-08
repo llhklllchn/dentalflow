@@ -55,7 +55,7 @@ export async function registerClinicAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirectToRegisterWithError(parsed.error.issues[0]?.message ?? "Unable to create clinic.");
+  redirectToRegisterWithError(parsed.error.issues[0]?.message ?? "تعذر إنشاء العيادة.");
   }
 
   if (shouldUseDemoData()) {

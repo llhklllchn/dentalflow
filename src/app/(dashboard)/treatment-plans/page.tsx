@@ -31,7 +31,7 @@ export default async function TreatmentPlansPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Treatment Plans"
+        eyebrow="الخطط العلاجية"
         title="خطط العلاج"
         description="مساحة متابعة أقوى للعلاجات متعددة الجلسات، مع قراءة أسرع لتقدم التنفيذ وحجم المحفظة العلاجية والجلسات القادمة."
         tips={["راجع الخطط النشطة أولًا", "افتح الخطة من نفس البطاقة", "تابع الجلسات القادمة"]}

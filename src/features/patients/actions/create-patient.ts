@@ -89,7 +89,7 @@ export async function createPatient(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to create patient."
+        message: error instanceof Error ? error.message : "تعذر إنشاء ملف المريض."
     };
   }
 }

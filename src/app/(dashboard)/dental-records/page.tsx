@@ -52,7 +52,7 @@ export default async function DentalRecordsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Dental Records"
+        eyebrow="السجلات الطبية"
         title="السجلات الطبية"
         description="وحدة سريرية أوضح لقراءة الزيارات والتشخيصات والإجراءات مع نظرة أسرع على المتابعة والوصفات وحالة الأسنان المرتبطة بها."
         tips={["ابدأ بالسجل الأحدث", "راجع المتابعات المفتوحة", "افتح ملف المريض من نفس البطاقة"]}

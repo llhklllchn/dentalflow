@@ -85,7 +85,7 @@ export default async function NewAppointmentPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Create Appointment"
+        eyebrow="إنشاء موعد"
         title="حجز موعد جديد"
         description="رتّب الزيارة من أول مرة بشكل واضح للفريق كاملًا، مع اختيار المريض والطبيب والخدمة والوقت في مسار واحد نظيف يقلل الأخطاء وإعادة الجدولة."
         tips={[

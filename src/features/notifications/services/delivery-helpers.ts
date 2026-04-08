@@ -24,6 +24,6 @@ export function buildNotificationSubject(templateSubject: string | null | undefi
 }
 
 export function normalizeDeliveryError(error: unknown) {
-  const message = error instanceof Error ? error.message : "Notification delivery failed.";
+  const message = error instanceof Error ? error.message : "تعذر تسليم الإشعار.";
   return message.slice(0, 500);
 }

@@ -122,7 +122,7 @@ export async function inviteStaff(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to invite staff."
+        message: error instanceof Error ? error.message : "تعذر إرسال دعوة الموظف."
     };
   }
 }

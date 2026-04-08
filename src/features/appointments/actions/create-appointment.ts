@@ -164,7 +164,7 @@ export async function createAppointment(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to create appointment."
+        message: error instanceof Error ? error.message : "تعذر إنشاء الموعد."
     };
   }
 }

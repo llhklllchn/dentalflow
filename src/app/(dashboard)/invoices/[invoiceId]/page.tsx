@@ -209,7 +209,7 @@ export default async function InvoiceDetailsPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Invoice Collection"
+        eyebrow="متابعة الفاتورة"
         title={`الفاتورة ${invoice.id}`}
         description="صفحة تنفيذية أوضح لإدارة الفاتورة: البنود، التفصيل المالي، سجل الدفعات، وحالة التحصيل ضمن مشهد واحد للمحاسبة والإدارة."
         tips={[

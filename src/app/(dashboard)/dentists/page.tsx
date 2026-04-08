@@ -125,7 +125,7 @@ export default async function DentistsPage({ searchParams }: DentistsPageProps) 
   return (
     <div>
       <PageHeader
-        eyebrow="Dentists"
+        eyebrow="الأطباء"
         title="الأطباء"
         description="إدارة الفريق الطبي بصياغة أوضح: ربط الطبيب بحسابه، قراءة التغطية اليومية، ومراجعة التخصصات وساعات العمل من نفس الشاشة."
         tips={["اربط الحساب قبل الجدولة", "راجع التغطية الزمنية", "ثبت مدة الجلسة الافتراضية"]}

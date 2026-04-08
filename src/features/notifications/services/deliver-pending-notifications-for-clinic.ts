@@ -92,7 +92,7 @@ export async function deliverPendingNotificationsForClinic(input: {
         },
         data: {
           status: "FAILED",
-          errorMessage: "No valid recipient found for this notification."
+            errorMessage: "لا يوجد مستلم صالح لهذا الإشعار."
         }
       });
       continue;

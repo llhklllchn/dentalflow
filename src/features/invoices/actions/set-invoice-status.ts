@@ -109,7 +109,7 @@ export async function setInvoiceStatus(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to update invoice status."
+        message: error instanceof Error ? error.message : "تعذر تحديث حالة الفاتورة."
     };
   }
 }

@@ -28,7 +28,7 @@ export async function requestPasswordResetAction(formData: FormData) {
 
   if (!parsed.success) {
     redirectToForgotPasswordError(
-      parsed.error.issues[0]?.message ?? "Unable to prepare password reset."
+    parsed.error.issues[0]?.message ?? "تعذر تجهيز طلب استعادة كلمة المرور."
     );
   }
 

@@ -83,7 +83,7 @@ export async function setServiceActiveState(input: unknown) {
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Unable to update service activity."
+        message: error instanceof Error ? error.message : "تعذر تحديث حالة الخدمة."
     };
   }
 }

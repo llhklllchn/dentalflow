@@ -119,7 +119,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   return (
     <div>
       <PageHeader
-        eyebrow="Reports"
+        eyebrow="التقارير"
         title="التقارير"
         description="مركز تقارير تنفيذي يربط القراءة التشغيلية والمالية في مكان واحد، مع أدوات طباعة وتصدير جاهزة لتسهيل المراجعة الداخلية أو مشاركة الملخص مع الإدارة."
         tips={["اطبع الملخص الحالي", "صدّر الأداء إلى CSV", "غيّر الفترة الزمنية بسرعة"]}

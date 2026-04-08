@@ -95,7 +95,7 @@ export default async function NewDentalRecordPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Create Dental Record"
+        eyebrow="إنشاء سجل طبي"
         title="إضافة سجل طبي جديد"
         description="وثّق الزيارة السريرية بشكل منظم من أول مرة، مع مسار واضح للطبيب يحفظ الشكوى والفحص والتشخيص والإجراء والمتابعة داخل ملف المريض."
         tips={[

@@ -16,7 +16,7 @@ export default function GlobalErrorPage({ error, reset }: GlobalErrorPageProps) 
         <main className="mx-auto flex min-h-screen max-w-5xl items-center px-4 py-10 md:px-8">
           <div className="panel w-full p-8">
             <div className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-700">
-              Critical Error
+              خطأ حرج
             </div>
             <h1 className="mt-3 text-4xl font-bold text-ink">تعذر تحميل التطبيق</h1>
             <p className="mt-4 text-sm leading-8 text-slate-600">

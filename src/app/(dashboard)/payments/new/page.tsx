@@ -90,7 +90,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
   return (
     <div>
       <PageHeader
-        eyebrow="Record Payment"
+        eyebrow="تسجيل دفعة"
         title="تسجيل دفعة جديدة"
         description="وثّق التحصيل بشكل دقيق ومرتب من أول مرة، مع ربط مباشر بالفاتورة والمريض وتحديث الحالة المالية تلقائيًا بعد الحفظ."
         tips={[
